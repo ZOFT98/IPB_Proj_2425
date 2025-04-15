@@ -9,9 +9,11 @@ export default function PasswordRecoveryPage() {
     e.preventDefault();
     // Add actual password recovery request logic here (e.g., API call)
     console.log("Password recovery requested for:", email);
-    alert("Se o email existir na nossa base de dados, receberá um link para recuperar a senha.");
+    alert(
+      "Se o email existir na nossa base de dados, receberá um link para recuperar a senha.",
+    );
     // Optionally navigate back to login after request
-    navigate('/'); 
+    navigate("/");
   };
 
   return (
@@ -21,7 +23,7 @@ export default function PasswordRecoveryPage() {
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
           Recuperar Senha
         </h1>
-        
+
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           Insira o seu email para receber um link de recuperação.
         </p>

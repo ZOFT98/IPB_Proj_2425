@@ -1,6 +1,13 @@
 import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import { HomePage, Users, Reservas, Tickets, RegisterPage, PasswordRecoveryPage } from "./pages";
+import {
+  HomePage,
+  Users,
+  Reservas,
+  Tickets,
+  RegisterPage,
+  PasswordRecoveryPage,
+} from "./pages";
 import { Navbar } from "./components";
 
 function App() {

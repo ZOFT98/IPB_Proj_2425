@@ -13,7 +13,12 @@ const Navbar = () => {
   const location = useLocation(); // Get current route
 
   // Hide navbar on the login page (accessible via / and /login)
-  if (location.pathname === "/" || location.pathname === "/login" || location.pathname === "/register" || location.pathname === "/password-recovery") {
+  if (
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/register" ||
+    location.pathname === "/password-recovery"
+  ) {
     return null;
   }
 

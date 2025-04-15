@@ -16,7 +16,7 @@ export default function RegisterPage() {
     }
     console.log("Registering account:", { name, email, password });
     // Navigate to login or home page after successful registration
-    navigate('/login'); 
+    navigate("/login");
   };
 
   return (
