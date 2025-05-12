@@ -23,7 +23,10 @@ const Navbar = () => {
   }
 
   return (
+    
     <aside className="w-64 bg-white dark:bg-gray-800 shadow-md p-4 flex flex-col">
+      <Link
+      to="/home">
       <div className="flex items-center mb-8">
         <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
         <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">
@@ -31,25 +34,18 @@ const Navbar = () => {
         </h2>
         <FaFutbol className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
       </div>
-
-      <div className="mb-8">
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
-          Body text for whatever youd like to say. Add main takeaway points,
-          quote, anecdotes, or even a very very short story.
-        </p>
-      </div>
+      </Link>
 
       <nav className="flex flex-col gap-6">
+       
         <Link
-          to="/home"
+          to="/spaces"
           className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
         >
           <FaHome className="mr-3" />
           <div>
-            <h3 className="font-semibold">Home</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Body text about home section...
-            </p>
+            <h3 className="font-semibold">Instalações</h3>
+            
           </div>
         </Link>
 
@@ -60,9 +56,7 @@ const Navbar = () => {
           <FaUsers className="mr-3" />
           <div>
             <h3 className="font-semibold">Utilizadores</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Body text about users section...
-            </p>
+            
           </div>
         </Link>
 
@@ -73,9 +67,7 @@ const Navbar = () => {
           <FaCalendarAlt className="mr-3" />
           <div>
             <h3 className="font-semibold">Reservas</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Body text about bookings...
-            </p>
+            
           </div>
         </Link>
 
@@ -86,9 +78,7 @@ const Navbar = () => {
           <FaTicketAlt className="mr-3" />
           <div>
             <h3 className="font-semibold">Tickets</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Body text about tickets...
-            </p>
+            
           </div>
         </Link>
       </nav>
