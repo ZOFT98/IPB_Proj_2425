@@ -11,6 +11,7 @@
     "format": "prettier --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" --ignore-path .gitignore"
   },
   "dependencies": {
+    "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.9.0",
     "lucide-react": "^0.483.0",
