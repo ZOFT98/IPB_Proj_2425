@@ -78,7 +78,7 @@ const AddUserPage = () => {
         const uploadResponse = await axios.post(UPLOAD_URL, formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
-          }
+          } 
         });
         
         imagePath = uploadResponse.data.path || imagePath;

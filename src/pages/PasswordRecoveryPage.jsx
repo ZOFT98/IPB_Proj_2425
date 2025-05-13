@@ -12,14 +12,19 @@ export default function PasswordRecoveryPage() {
     alert(
       "Se o email existir na nossa base de dados, receberá um link para recuperar a senha.",
     );
-    // Optionally navigate back to login after request
+    
     navigate("/");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center">
-        {/* Title */}
+    <div 
+      className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{ 
+        backgroundImage: "url('/uploads/background.jpg')"
+      }}
+    >
+      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center mx-4">
+        
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
           Recuperar Senha
         </h1>
@@ -29,7 +34,7 @@ export default function PasswordRecoveryPage() {
         </p>
 
         <form onSubmit={handlePasswordRecoveryRequest} className="space-y-4">
-          {/* Email input */}
+          
           <div>
             <input
               type="email"
@@ -41,7 +46,6 @@ export default function PasswordRecoveryPage() {
             />
           </div>
 
-          {/* Submit button */}
           <button
             type="submit"
             className="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-2 px-4 rounded-md transition duration-200"
@@ -50,11 +54,10 @@ export default function PasswordRecoveryPage() {
           </button>
         </form>
 
-        {/* Back to Login Link */}
         <div className="mt-6">
           <button
             type="button"
-            onClick={() => navigate("/")} // Navigate back to login
+            onClick={() => navigate("/")}
             className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none"
           >
             Voltar ao Login

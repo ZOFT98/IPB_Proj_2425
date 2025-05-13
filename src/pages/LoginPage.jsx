@@ -1,4 +1,5 @@
 import { FaFutbol } from "react-icons/fa";
+import { FaBasketball } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
@@ -18,39 +19,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center">
+    <div
+      className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
+      style={{ backgroundImage: "url('/uploads/background.jpg')" }}
+    >
+      
+      {/* Login Card */}
+      <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center relative z-10">
         {/* Top Title */}
         <div className="flex items-center justify-center mb-8">
           <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
           <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
             Espacos Desportivos
           </h2>
-          <FaFutbol className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
+          <FaBasketball className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
         </div>
 
+        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email input */}
+          {/* Email */}
           <div>
             <input
               type="email"
               placeholder="Email"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              //required
             />
           </div>
 
-          {/* Password input */}
+          {/* Password */}
           <div>
             <input
               type="password"
               placeholder="Senha de acesso"
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              //required
             />
           </div>
 
-          {/* Remember me checkbox */}
+          {/* Remember me */}
           <div className="flex items-center justify-start">
             <input
               type="checkbox"
@@ -65,7 +70,7 @@ export default function LoginPage() {
             </label>
           </div>
 
-          {/* Login button */}
+          {/* Submit */}
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
@@ -74,9 +79,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Links Section */}
+        {/* Links */}
         <div className="mt-6 flex flex-col items-center space-y-2">
-          {/* Password recovery */}
           <button
             type="button"
             onClick={handlePasswordRecovery}
@@ -85,7 +89,6 @@ export default function LoginPage() {
             Recuperar senha de acesso
           </button>
 
-          {/* Create Account */}
           <button
             type="button"
             onClick={handleCreateAccount}

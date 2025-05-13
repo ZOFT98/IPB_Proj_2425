@@ -7,15 +7,33 @@
     <title>Plataforma de Gestão de Instalações Desportivas</title>
     <script>
       // Initialize theme ASAP to prevent FOUC
-      (
-        function() {
-          const savedTheme = localStorage.getItem('theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const theme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
-          if (theme === "dark") { document.documentElement.classList.add("dark"); } else { document.documentElement.classList.remove("dark"); };
+      (function () {
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
         }
-      )();
+      })();
     </script>
+
+    <style>
+      /* 💥 Hard reset for full control */
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      #root {
+        height: 100%;
+        width: 100%;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
