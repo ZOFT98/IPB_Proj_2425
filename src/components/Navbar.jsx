@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaUsers,
   FaCalendarAlt,
@@ -8,11 +8,23 @@ import {
   FaHome,
 } from "react-icons/fa";
 import ThemeToggle from "./ThemeToggle";
+import { useAuth } from "../contexts/AuthContext"; 
 
 const Navbar = () => {
-  const location = useLocation(); // Get current route
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  // Hide navbar on the login page (accessible via / and /login)
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      alert("Erro ao fazer logout.");
+    }
+  };
+
   if (
     location.pathname === "/" ||
     location.pathname === "/login" ||
@@ -23,21 +35,18 @@ const Navbar = () => {
   }
 
   return (
-    
     <aside className="w-64 bg-white dark:bg-gray-800 shadow-md p-4 flex flex-col">
-      <Link
-      to="/home">
-      <div className="flex items-center mb-8">
-        <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
-        <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">
-          Espacos Desportivos
-        </h2>
-        <FaFutbol className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
-      </div>
+      <Link to="/home">
+        <div className="flex items-center mb-8">
+          <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
+          <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">
+            Espacos Desportivos
+          </h2>
+          <FaFutbol className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
+        </div>
       </Link>
 
       <nav className="flex flex-col gap-6">
-       
         <Link
           to="/spaces"
           className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
@@ -45,7 +54,6 @@ const Navbar = () => {
           <FaHome className="mr-3" />
           <div>
             <h3 className="font-semibold">Instalações</h3>
-            
           </div>
         </Link>
 
@@ -56,7 +64,6 @@ const Navbar = () => {
           <FaUsers className="mr-3" />
           <div>
             <h3 className="font-semibold">Utilizadores</h3>
-            
           </div>
         </Link>
 
@@ -67,7 +74,6 @@ const Navbar = () => {
           <FaCalendarAlt className="mr-3" />
           <div>
             <h3 className="font-semibold">Reservas</h3>
-            
           </div>
         </Link>
 
@@ -78,19 +84,18 @@ const Navbar = () => {
           <FaTicketAlt className="mr-3" />
           <div>
             <h3 className="font-semibold">Tickets</h3>
-            
           </div>
         </Link>
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <Link
-          to="/"
+        <button
+          onClick={handleLogout}
           className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400"
         >
           <FaSignOutAlt className="mr-2" />
           Logout
-        </Link>
+        </button>
         <ThemeToggle />
       </div>
     </aside>

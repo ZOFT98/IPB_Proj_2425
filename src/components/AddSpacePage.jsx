@@ -1,9 +1,8 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = "http://localhost:3001/spaces";
-const UPLOAD_URL = "http://localhost:3001/upload"; 
+import { db, storage } from "../firebase";
+import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const AddSpacePage = () => {
   const [form, setForm] = useState({ 
@@ -18,6 +17,7 @@ const AddSpacePage = () => {
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -28,7 +28,6 @@ const AddSpacePage = () => {
     if (!form.postCode.trim()) newErrors.postCode = "Código postal é obrigatório";
     if (!form.locality.trim()) newErrors.locality = "Localidade é obrigatória";
     if (!form.price.trim()) newErrors.price = "Preço é obrigatório";
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -36,7 +35,6 @@ const AddSpacePage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -45,19 +43,17 @@ const AddSpacePage = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
-    // Validate image type
+
     if (!file.type.startsWith('image/')) {
       alert('Por favor, selecione um arquivo de imagem válido');
       return;
     }
-  
-    // Validate image size (5MB max)
+
     if (file.size > 5 * 1024 * 1024) {
       alert('A imagem deve ser menor que 5MB');
       return;
     }
-  
+
     setForm({...form, image: file});
     setPreview(URL.createObjectURL(file));
   };
@@ -65,51 +61,51 @@ const AddSpacePage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
+    setUploading(true);
+
     try {
-      // Step 1: Upload image if exists
-      let imagePath = "/default-space.jpg";
-      
+      // Cria um novo ID antecipadamente
+      const newDocRef = doc(collection(db, "spaces"));
+      let imageUrl = "/default-space.jpg";
+
       if (form.image instanceof File) {
-        console.log("Preparing to upload image...");
-        const formData = new FormData();
-        formData.append('image', form.image);
-        
-        const uploadResponse = await axios.post(UPLOAD_URL, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          },
-          withCredentials: false
+        const imageRef = ref(storage, `spaces/${newDocRef.id}-${form.image.name}`);
+        const uploadTask = uploadBytesResumable(imageRef, form.image);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            (error) => reject(error),
+            async () => {
+              imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            }
+          );
         });
-        
-        console.log("Upload response:", uploadResponse.data);
-        if (!uploadResponse.data.path) {
-          throw new Error("Server didn't return image path");
-        }
-        imagePath = uploadResponse.data.path;
       }
 
-      // Step 2: Create space
       const spaceData = {
+        id: newDocRef.id, // salva o ID no próprio doc
         name: form.name,
         modality: form.modality,
         address: form.address,
         postCode: form.postCode,
         locality: form.locality,
         price: form.price,
-        image: imagePath,
-        available: form.available
+        image: imageUrl,
+        available: form.available,
+        createdAt: Timestamp.now()
       };
 
-      console.log("Creating space with:", spaceData);
-      const response = await axios.post(API_URL, spaceData);
-      console.log("Space created:", response.data);
-      
+      await setDoc(newDocRef, spaceData);
       navigate("/spaces");
     } catch (error) {
-      console.error("Full error:", error);
-      console.error("Error response:", error.response);
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      console.error("Erro ao criar espaço:", error);
+      alert("Erro ao criar espaço. Tente novamente.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -118,15 +114,10 @@ const AddSpacePage = () => {
       <div className="mx-auto max-w-md px-4 py-8">
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Espaço Esportivo</h1>
-          
-          {/* Image Upload */}
+
           <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img 
-                src={preview} 
-                alt="Preview" 
-                className="w-32 h-32 rounded-lg object-cover mb-2"
-              />
+              <img src={preview} alt="Preview" className="w-32 h-32 rounded-lg object-cover mb-2" />
             ) : (
               <div className="w-32 h-32 rounded-lg bg-gray-200 mb-2 flex items-center justify-center">
                 <span className="text-gray-500">Sem imagem</span>
@@ -136,81 +127,24 @@ const AddSpacePage = () => {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
+              disabled={uploading}
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-          </div>
-          
-          <div className="mb-3">
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Nome *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? 'border-red-500' : ''}`}
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
           </div>
 
-          <div className="mb-3">
-            <input
-              name="modality"
-              value={form.modality}
-              onChange={handleChange}
-              placeholder="Modalidade *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.modality ? 'border-red-500' : ''}`}
-            />
-            {errors.modality && <p className="text-red-500 text-sm mt-1">{errors.modality}</p>}
-          </div>
-          
-          <div className="mb-3">
-            <input
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Endereço *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.address ? 'border-red-500' : ''}`}
-            />
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-          </div>
-          
-          <div className="mb-3">
-            <input
-              name="postCode"
-              value={form.postCode}
-              onChange={handleChange}
-              placeholder="Código Postal *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.postCode ? 'border-red-500' : ''}`}
-            />
-            {errors.postCode && <p className="text-red-500 text-sm mt-1">{errors.postCode}</p>}
-          </div>
-          
-          <div className="mb-3">
-            <input
-              name="locality"
-              value={form.locality}
-              onChange={handleChange}
-              placeholder="Localidade *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.locality ? 'border-red-500' : ''}`}
-            />
-            {errors.locality && <p className="text-red-500 text-sm mt-1">{errors.locality}</p>}
-          </div>
-          
-          <div className="mb-3">
-            <input
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="Preço *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.price ? 'border-red-500' : ''}`}
-            />
-            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-          </div>
-          
+          {["name", "modality", "address", "postCode", "locality", "price"].map((field) => (
+            <div className="mb-3" key={field}>
+              <input
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field] ? 'border-red-500' : ''}`}
+              />
+              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+            </div>
+          ))}
+
           <div className="mb-4 flex items-center">
             <input
               type="checkbox"
@@ -222,13 +156,14 @@ const AddSpacePage = () => {
             />
             <label htmlFor="availableCheckbox">Disponível</label>
           </div>
-          
+
           <div className="flex gap-2 justify-center mt-4">
             <button
               type="submit"
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              disabled={uploading}
             >
-              Adicionar
+              {uploading ? "Salvando..." : "Adicionar"}
             </button>
             <button
               type="button"

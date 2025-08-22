@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { register } from "../firebase/authService";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -8,15 +9,22 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = (e) => {
-    e.preventDefault();
-    if (password !== confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-    console.log("Registering account:", { name, email, password });
+  const handleRegister = async (e) => {
+  e.preventDefault();
+
+  if (password !== confirmPassword) {
+    alert("As passwords não coincidem!");
+    return;
+  }
+
+  try {
+    await register(email, password); 
+    alert("Conta criada com sucesso!");
     navigate("/login");
-  };
+  } catch (error) {
+    alert("Erro ao criar conta: " + error.message);
+  }
+};
 
   return (
     <div 

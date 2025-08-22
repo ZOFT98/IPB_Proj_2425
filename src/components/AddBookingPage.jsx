@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
-const API_URL = "http://localhost:3001/bookings";
-
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 const AddBookingPage = () => {
   const [form, setForm] = useState({
     title: "",
@@ -24,21 +22,18 @@ const AddBookingPage = () => {
     if (!form.date) newErrors.date = "Data é obrigatório";
     if (!form.startTime) newErrors.startTime = "Hora de inicio é obrigatório";
     if (!form.endTime) newErrors.endTime = "Hora de fim é obrigatório";
-    
-    // Validate time logic
+
     if (form.startTime && form.endTime && form.startTime >= form.endTime) {
-      newErrors.endTime = "End time must be after start time";
+      newErrors.endTime = "Hora final deve ser depois da hora inicial";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;  // Changed from title to name
+    const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -47,28 +42,18 @@ const AddBookingPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     try {
-      const bookingData = {
-        title: form.title,
-        space: form.space,
-        date: form.date,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        description: form.description,
-        status: form.status,
-        createdAt: new Date().toISOString()
+      const docData = {
+        ...form,
+        createdAt: Timestamp.now()
       };
-  
-      console.log("Creating booking with:", bookingData);
-      const response = await axios.post(API_URL, bookingData);
-      console.log("Booking created:", response.data);
-      
+
+      await addDoc(collection(db, "bookings"), docData);
       navigate("/bookings");
     } catch (error) {
-      console.error("Full error:", error);
-      console.error("Error response:", error.response);
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      console.error("Erro ao adicionar reserva:", error);
+      alert("Erro ao adicionar reserva. Verifique o console.");
     }
   };
 
@@ -77,8 +62,8 @@ const AddBookingPage = () => {
       <div className="mx-auto max-w-md px-4 py-8">
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Reserva</h1>
-          
-          {/* Title Field */}
+
+          {/* Title */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Titulo *</label>
             <input
@@ -91,6 +76,7 @@ const AddBookingPage = () => {
             {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
           </div>
 
+          {/* Space */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Espaço Desportivo *</label>
             <input
@@ -100,10 +86,10 @@ const AddBookingPage = () => {
               placeholder="Espaço Desportivo"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? 'border-red-500' : ''}`}
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.space}</p>}
+            {errors.space && <p className="text-red-500 text-sm mt-1">{errors.space}</p>}
           </div>
 
-          {/* Date and Status Fields */}
+          {/* Date + Status */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium mb-1">Data *</label>
@@ -131,7 +117,7 @@ const AddBookingPage = () => {
             </div>
           </div>
 
-          {/* Time Fields */}
+          {/* Time */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium mb-1">Hora Inicial *</label>
@@ -157,7 +143,7 @@ const AddBookingPage = () => {
             </div>
           </div>
 
-          {/* Description Field */}
+          {/* Description */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Descrição</label>
             <textarea
@@ -170,7 +156,7 @@ const AddBookingPage = () => {
             />
           </div>
 
-          {/* Form Actions */}
+          {/* Buttons */}
           <div className="flex gap-2 justify-center mt-6">
             <button
               type="submit"

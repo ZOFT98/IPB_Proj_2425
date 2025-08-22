@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { resetPassword } from "../firebase/authService";
 
 export default function PasswordRecoveryPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
 
-  const handlePasswordRecoveryRequest = (e) => {
-    e.preventDefault();
-    // Add actual password recovery request logic here (e.g., API call)
-    console.log("Password recovery requested for:", email);
-    alert(
-      "Se o email existir na nossa base de dados, receberá um link para recuperar a senha.",
-    );
-    
+  const handlePasswordRecoveryRequest = async (e) => {
+  e.preventDefault();
+
+  try {
+    await resetPassword(email);
+    alert("Se o email existir, um link de recuperação foi enviado.");
     navigate("/");
-  };
+  } catch (error) {
+    alert("Erro ao enviar email de recuperação: " + error.message);
+  }
+};
 
   return (
     <div 

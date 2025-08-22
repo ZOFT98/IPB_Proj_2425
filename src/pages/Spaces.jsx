@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-
-const API_URL = "http://localhost:3001/spaces";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { db } from "../firebase";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 const Spaces = () => {
   const [spaces, setSpaces] = useState([]);
@@ -14,16 +13,20 @@ const Spaces = () => {
 
   const fetchSpaces = async () => {
     try {
-      const response = await axios.get(API_URL);
-      setSpaces(response.data);
+      const snapshot = await getDocs(collection(db, "spaces"));
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setSpaces(list);
     } catch (error) {
-      console.error("Error fetching spaces:", error);
+      console.error("Error fetching spaces from Firestore:", error);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
+      await deleteDoc(doc(db, "spaces", id));
       fetchSpaces();
     } catch (error) {
       console.error("Error deleting space:", error);
@@ -62,16 +65,10 @@ const Spaces = () => {
               
               <div className="space-y-2">
                 <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Morada:</span> {space.address}
+                  <span className="font-medium">Morada:</span> {space.address}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
                   {space.postCode} • {space.locality}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Tipo de campo:</span> {space.type}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Descrição:</span> {space.description}
                 </p>
                 <p className={`text-sm ${
                   space.available ? 'text-green-500' : 'text-red-500'

@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
-
-const API_URL = "http://localhost:3001/tickets";
+import { db } from '../firebase';
+import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 
 const EditTicketPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    title: "",
-    name: "",
-    space: "",
-    date: "",
-    description: "",
-    status: "pending"
+    title: '',
+    name: '',
+    space: '',
+    date: '',
+    description: '',
+    status: 'pending'
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -21,26 +20,37 @@ const EditTicketPage = () => {
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        setIsLoading(true);
-        const response = await axios.get(`${API_URL}/${id}`);
-        setForm(response.data);
+        const ticketRef = doc(db, 'tickets', id);
+        const snapshot = await getDoc(ticketRef);
+
+        if (!snapshot.exists()) {
+          alert('Ticket não encontrado');
+          return navigate('/tickets');
+        }
+
+        const data = snapshot.data();
+        setForm({
+          ...data,
+          date: data.date?.toDate().toISOString().split('T')[0] || ''
+        });
       } catch (error) {
-        console.error("Error fetching ticket:", error);
-        alert("Failed to load ticket data");
-        navigate("/tickets");
+        console.error('Erro ao buscar ticket:', error);
+        alert('Erro ao carregar o ticket');
+        navigate('/tickets');
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchTicket();
   }, [id, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = "Título é obrigatório";
-    if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
-    if (!form.space.trim()) newErrors.space = "Espaço é obrigatório";
-    if (!form.date) newErrors.date = "Data é obrigatória";
+    if (!form.title.trim()) newErrors.title = 'Título é obrigatório';
+    if (!form.name.trim()) newErrors.name = 'Nome é obrigatório';
+    if (!form.space.trim()) newErrors.space = 'Espaço é obrigatório';
+    if (!form.date) newErrors.date = 'Data é obrigatória';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -48,25 +58,28 @@ const EditTicketPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
-      const updatedData = {
+      const ticketRef = doc(db, 'tickets', id);
+      const updatedTicket = {
         ...form,
-        updatedAt: new Date().toISOString()
+        date: new Date(form.date),
+        updatedAt: Timestamp.now()
       };
-      
-      await axios.put(`${API_URL}/${id}`, updatedData);
-      navigate("/tickets");
+      await updateDoc(ticketRef, updatedTicket);
+      navigate('/tickets');
     } catch (error) {
-      console.error("Error updating ticket:", error);
-      alert(`Error: ${error.response?.data?.message || error.message}`);
+      console.error('Erro ao atualizar ticket:', error);
+      alert(`Erro: ${error.message}`);
     }
   };
 
@@ -172,7 +185,7 @@ const EditTicketPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate("/tickets")}
+              onClick={() => navigate('/tickets')}
               className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
             >
               Cancelar

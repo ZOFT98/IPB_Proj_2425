@@ -1,31 +1,40 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
-const API_URL = "http://localhost:3001/tickets";
+import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const navigate = useNavigate();
 
+  const fetchTickets = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "tickets"));
+      const docs = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTickets(docs);
+    } catch (error) {
+      console.error("Erro ao buscar tickets:", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        const response = await axios.get(API_URL);
-        setTickets(response.data);
-      } catch (error) {
-        console.error("Error fetching tickets:", error);
-      }
-    };
     fetchTickets();
   }, []);
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${API_URL}/${id}`);
-      setTickets(tickets.filter((ticket) => ticket.id !== id));
+      await deleteDoc(doc(db, "tickets", id));
+      setTickets(prev => prev.filter((t) => t.id !== id));
     } catch (error) {
-      console.error("Error deleting ticket:", error);
+      console.error("Erro ao deletar ticket:", error);
     }
   };
 
@@ -37,7 +46,7 @@ const Tickets = () => {
         return "text-red-500";
       case "in_progress":
         return "text-yellow-500";
-      default: // pending
+      default:
         return "text-blue-500";
     }
   };
@@ -50,7 +59,7 @@ const Tickets = () => {
         return "Cancelado";
       case "in_progress":
         return "Em progresso";
-      default: // pending
+      default:
         return "Pendente";
     }
   };
@@ -83,7 +92,8 @@ const Tickets = () => {
                   <span className="font-semibold">Espaço:</span> {ticket.space}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Data:</span> {new Date(ticket.date).toLocaleDateString()}
+                  <span className="font-semibold">Data:</span>{" "}
+                  {ticket.date ? new Date(ticket.date.seconds * 1000).toLocaleDateString() : "-"}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Descrição:</span> {ticket.description}
@@ -92,12 +102,12 @@ const Tickets = () => {
                   <span className="font-semibold">Status:</span> {getStatusText(ticket.status)}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Criado em: {new Date(ticket.createdAt).toLocaleString('pt-PT')}
+                  Criado em: {ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleString("pt-PT") : "-"}
                 </p>
                 {ticket.updatedAt && (
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Atualizado em: {new Date(ticket.updatedAt).toLocaleString('pt-PT')}
-                </p>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">
+                    Atualizado em: {new Date(ticket.updatedAt.seconds * 1000).toLocaleString("pt-PT")}
+                  </p>
                 )}
               </div>
 

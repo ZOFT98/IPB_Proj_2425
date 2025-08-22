@@ -1,13 +1,24 @@
 import { FaFutbol } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
+import { login } from "../firebase/authService";
+import { useState } from "react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    navigate("/home");
+
+    try {
+      await login(email, password); 
+      navigate("/home"); 
+    } catch (error) {
+      alert("Erro ao iniciar sessão: " + error.message); 
+    }
   };
 
   const handlePasswordRecovery = () => {
@@ -23,7 +34,7 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
       style={{ backgroundImage: "url('/uploads/background.jpg')" }}
     >
-      
+
       {/* Login Card */}
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center relative z-10">
         {/* Top Title */}
@@ -42,6 +53,8 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -51,6 +64,8 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="Senha de acesso"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

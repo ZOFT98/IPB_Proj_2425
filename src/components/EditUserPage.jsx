@@ -1,21 +1,28 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const API_URL = "http://localhost:3001/users";
-const UPLOAD_URL = "http://localhost:3001/upload";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+} from "firebase/firestore";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import { db, storage } from "../firebase";
 
 const EditUserPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ 
-    name: "", 
-    email: "", 
-    address: "", 
-    contact: "", 
-    birthdate: "", 
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    address: "",
+    contact: "",
+    birthdate: "",
     gender: "",
-    picture: ""
+    picture: "",
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
@@ -23,11 +30,18 @@ const EditUserPage = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get(`${API_URL}/${id}`);
-        setForm(response.data);
-        setPreview(response.data.picture);
+        const docRef = doc(db, "users", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setForm(data);
+          setPreview(data.picture || "/default-profile.png");
+        } else {
+          alert("Usuário não encontrado");
+          navigate("/users");
+        }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error("Erro ao buscar usuário:", error);
         navigate("/users");
       }
     };
@@ -42,16 +56,16 @@ const EditUserPage = () => {
     if (!form.contact.trim()) newErrors.contact = "Contato é obrigatório";
     if (!form.birthdate) newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -59,92 +73,81 @@ const EditUserPage = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Client-side validation
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione um arquivo de imagem válido');
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor, selecione um arquivo de imagem válido");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem deve ser menor que 5MB');
+      alert("A imagem deve ser menor que 5MB");
       return;
     }
 
-    setForm({...form, picture: file});
+    setForm({ ...form, picture: file });
     setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
-      console.log("Starting update process...");
-      let imagePath = form.picture;
-      
+      let pictureUrl = form.picture;
+
       if (form.picture instanceof File) {
-        console.log("New image detected, preparing upload...");
-        const formData = new FormData();
-        formData.append('image', form.picture);
-        
-        console.log("Uploading image to:", UPLOAD_URL);
-        const uploadResponse = await axios.post(UPLOAD_URL, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        const imageRef = ref(storage, `users/${Date.now()}-${form.picture.name}`);
+        const uploadTask = uploadBytesResumable(imageRef, form.picture);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            (error) => reject(error),
+            async () => {
+              pictureUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            }
+          );
         });
-        console.log("Upload response:", uploadResponse.data);
-        
-        if (!uploadResponse.data?.path) {
-          throw new Error("Server didn't return image path");
-        }
-        imagePath = uploadResponse.data.path;
-        console.log("New image path:", imagePath);
       }
-  
-      const userData = {
+
+      const updatedData = {
         name: form.name,
         email: form.email,
         address: form.address,
         contact: form.contact,
         birthdate: form.birthdate,
         gender: form.gender,
-        picture: imagePath
+        picture: pictureUrl,
       };
-  
-      console.log("Sending user update:", userData);
-      const response = await axios.put(`${API_URL}/${id}`, userData);
-      console.log("Update successful:", response.data);
-      
+
+      await updateDoc(doc(db, "users", id), updatedData);
       navigate("/users");
     } catch (error) {
-      console.error("UPDATE ERROR DETAILS:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers,
-        config: error.config
-      });
-      alert(`Erro ao atualizar usuário: ${error.response?.data?.message || error.message}`);
+      console.error("Erro ao atualizar usuário:", error);
+      alert("Erro ao atualizar usuário.");
     }
   };
 
   return (
     <div className="dark:text-gray-100">
-    <div className="mx-auto max-w-md px-4 py-8">
-      
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6 max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Editar Usuário</h1>
+      <div className="mx-auto max-w-md px-4 py-8">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <h1 className="text-2xl font-bold mb-6 text-center">Editar Usuário</h1>
 
-        <div className="mb-4 flex flex-col items-center">
+          {/* Avatar */}
+          <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img 
-                src={typeof preview === 'string' ? preview : URL.createObjectURL(preview)} 
-                alt="Preview" 
+              <img
+                src={preview}
+                alt="Preview"
                 className="w-32 h-32 rounded-full object-cover mb-2"
               />
             ) : (
-                <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
                 <span className="text-gray-500">Sem imagem</span>
               </div>
             )}
@@ -161,74 +164,51 @@ const EditUserPage = () => {
             />
           </div>
 
-          {/* Name Field */}
-          <div className="mb-3">
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Nome *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? 'border-red-500' : ''}`}
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
-          
-          {/* Email Field */}
-          <div className="mb-3">
-            <input
-              name="email"
-              type="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="Email *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.email ? 'border-red-500' : ''}`}
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
-          
-          {/* Address Field */}
-          <div className="mb-3">
-            <input
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Morada *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.address ? 'border-red-500' : ''}`}
-            />
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-          </div>
-          
-          {/* Contact Field */}
-          <div className="mb-3">
-            <input
-              name="contact"
-              value={form.contact}
-              onChange={handleChange}
-              placeholder="Contato *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.contact ? 'border-red-500' : ''}`}
-            />
-            {errors.contact && <p className="text-red-500 text-sm mt-1">{errors.contact}</p>}
-          </div>
-          
-          {/* Birthdate Field */}
+          {/* Inputs */}
+          {[
+            { name: "name", type: "text", placeholder: "Nome *" },
+            { name: "email", type: "email", placeholder: "Email *" },
+            { name: "address", type: "text", placeholder: "Morada *" },
+            { name: "contact", type: "text", placeholder: "Contato *" },
+          ].map(({ name, type, placeholder }) => (
+            <div className="mb-3" key={name}>
+              <input
+                name={name}
+                type={type}
+                value={form[name]}
+                onChange={handleChange}
+                placeholder={placeholder}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                  errors[name] ? "border-red-500" : ""
+                }`}
+              />
+              {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
+            </div>
+          ))}
+
+          {/* Birthdate */}
           <div className="mb-3">
             <input
               name="birthdate"
               type="date"
               value={form.birthdate}
               onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.birthdate ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                errors.birthdate ? "border-red-500" : ""
+              }`}
             />
             {errors.birthdate && <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>}
           </div>
-          
-          {/* Gender Field */}
+
+          {/* Gender */}
           <div className="mb-4">
             <select
               name="gender"
               value={form.gender}
               onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.gender ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                errors.gender ? "border-red-500" : ""
+              }`}
             >
               <option value="">Gênero *</option>
               <option value="Masculino">Masculino</option>
@@ -236,7 +216,8 @@ const EditUserPage = () => {
             </select>
             {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
           </div>
-          
+
+          {/* Buttons */}
           <div className="flex gap-2 justify-center mt-4">
             <button
               type="submit"

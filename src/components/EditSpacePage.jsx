@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-
-const API_URL = "http://localhost:3001/spaces";
-const UPLOAD_URL = "http://localhost:3001/upload";
+import { db, storage } from "../firebase";
+import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const EditSpacePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ 
+  const [form, setForm] = useState({
     name: "",
     modality: "",
     address: "",
@@ -20,18 +19,28 @@ const EditSpacePage = () => {
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchSpace = async () => {
       try {
-        const response = await axios.get(`${API_URL}/${id}`);
-        setForm(response.data);
-        setPreview(response.data.image);
+        const docRef = doc(db, "spaces", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setForm(data);
+          setPreview(data.image);
+        } else {
+          alert("Espaço não encontrado");
+          navigate("/spaces");
+        }
       } catch (error) {
-        console.error("Error fetching space:", error);
-        navigate("/spaces/edit/:id");
+        console.error("Erro ao buscar espaço:", error);
+        alert("Erro ao carregar espaço.");
       }
     };
+
     fetchSpace();
   }, [id, navigate]);
 
@@ -43,108 +52,88 @@ const EditSpacePage = () => {
     if (!form.postCode.trim()) newErrors.postCode = "Código postal é obrigatório";
     if (!form.locality.trim()) newErrors.locality = "Localidade é obrigatória";
     if (!form.price.trim()) newErrors.price = "Preço é obrigatório";
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
-    }
+    const { name, value, type, checked } = e.target;
+    const val = type === "checkbox" ? checked : value;
+    setForm((prev) => ({ ...prev, [name]: val }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione um arquivo de imagem válido');
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor, selecione uma imagem válida");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem deve ser menor que 5MB');
+      alert("Imagem deve ser menor que 5MB");
       return;
     }
 
-    setForm({...form, image: file});
+    setForm((prev) => ({ ...prev, image: file }));
     setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
+    setUploading(true);
+
     try {
-      console.log("Starting update process...");
-      let imagePath = form.image;
-      
+      let imageUrl = form.image;
+
       if (form.image instanceof File) {
-        console.log("New image detected, preparing upload...");
-        const formData = new FormData();
-        formData.append('image', form.image);
-        
-        console.log("Uploading image to:", UPLOAD_URL);
-        const uploadResponse = await axios.post(UPLOAD_URL, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
+        const imageRef = ref(storage, `spaces/${Date.now()}-${form.image.name}`);
+        const uploadTask = uploadBytesResumable(imageRef, form.image);
+
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            null,
+            (error) => reject(error),
+            async () => {
+              imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            }
+          );
         });
-        console.log("Upload response:", uploadResponse.data);
-        
-        if (!uploadResponse.data?.path) {
-          throw new Error("Server didn't return image path");
-        }
-        imagePath = uploadResponse.data.path;
-        console.log("New image path:", imagePath);
       }
-  
-      const spaceData = {
-        name: form.name,
-        modality: form.modality,
-        address: form.address,
-        postCode: form.postCode,
-        locality: form.locality,
-        price: form.price,
-        image: imagePath,
-        available: form.available
-      };
-  
-      console.log("Sending space update:", spaceData);
-      const response = await axios.put(`${API_URL}/${id}`, spaceData);
-      console.log("Update successful:", response.data);
-      
+
+      const spaceRef = doc(db, "spaces", id);
+      await updateDoc(spaceRef, {
+        ...form,
+        image: imageUrl,
+        updatedAt: Timestamp.now(),
+      });
+
       navigate("/spaces");
     } catch (error) {
-      console.error("UPDATE ERROR DETAILS:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers,
-        config: error.config
-      });
-      alert(`Erro ao atualizar espaço: ${error.response?.data?.message || error.message}`);
+      console.error("Erro ao atualizar espaço:", error);
+      alert("Erro ao atualizar espaço. Tente novamente.");
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
     <div className="dark:text-gray-100">
       <div className="mx-auto max-w-md px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm mb-6 max-w-md">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 text-center">Editar Espaço Esportivo</h1>
 
           <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img 
-                src={typeof preview === 'string' ? preview : URL.createObjectURL(preview)} 
-                alt="Preview" 
-                className="w-32 h-32 rounded-lg object-cover mb-2"
-              />
+              <img src={preview} alt="Preview" className="w-32 h-32 rounded-lg object-cover mb-2" />
             ) : (
-              <div className="w-32 h-32 rounded-lg bg-gray-200 mb-2 flex items-center justify-center">
+              <div className="w-32 h-32 bg-gray-200 flex items-center justify-center mb-2 rounded-lg">
                 <span className="text-gray-500">Sem imagem</span>
               </div>
             )}
@@ -152,6 +141,7 @@ const EditSpacePage = () => {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
+              disabled={uploading}
               className="block w-full text-sm text-gray-500
                 file:mr-4 file:py-2 file:px-4
                 file:rounded-md file:border-0
@@ -161,97 +151,40 @@ const EditSpacePage = () => {
             />
           </div>
 
-          {/* Name Field */}
-          <div className="mb-3">
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Nome *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? 'border-red-500' : ''}`}
-            />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-          </div>
-          
-          {/* Modality Field */}
-          <div className="mb-3">
-            <input
-              name="modality"
-              value={form.modality}
-              onChange={handleChange}
-              placeholder="Modalidade *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.modality ? 'border-red-500' : ''}`}
-            />
-            {errors.modality && <p className="text-red-500 text-sm mt-1">{errors.modality}</p>}
-          </div>
-          
-          {/* Address Field */}
-          <div className="mb-3">
-            <input
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Endereço *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.address ? 'border-red-500' : ''}`}
-            />
-            {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
-          </div>
-          
-          {/* Post Code Field */}
-          <div className="mb-3">
-            <input
-              name="postCode"
-              value={form.postCode}
-              onChange={handleChange}
-              placeholder="Código Postal *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.postCode ? 'border-red-500' : ''}`}
-            />
-            {errors.postCode && <p className="text-red-500 text-sm mt-1">{errors.postCode}</p>}
-          </div>
-          
-          {/* Locality Field */}
-          <div className="mb-3">
-            <input
-              name="locality"
-              value={form.locality}
-              onChange={handleChange}
-              placeholder="Localidade *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.locality ? 'border-red-500' : ''}`}
-            />
-            {errors.locality && <p className="text-red-500 text-sm mt-1">{errors.locality}</p>}
-          </div>
-          
-          {/* Price Field */}
-          <div className="mb-3">
-            <input
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="Preço *"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.price ? 'border-red-500' : ''}`}
-            />
-            {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-          </div>
-          
-          {/* Available Field */}
+          {["name", "modality", "address", "postCode", "locality", "price"].map((field) => (
+            <div className="mb-3" key={field}>
+              <input
+                name={field}
+                value={form[field]}
+                onChange={handleChange}
+                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                  errors[field] ? "border-red-500" : ""
+                }`}
+              />
+              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+            </div>
+          ))}
+
           <div className="mb-4 flex items-center">
             <input
               type="checkbox"
               name="available"
               checked={form.available}
-              onChange={(e) => setForm({...form, available: e.target.checked})}
+              onChange={handleChange}
               className="w-4 h-4 mr-2"
               id="availableCheckbox"
             />
             <label htmlFor="availableCheckbox">Disponível</label>
           </div>
-          
+
           <div className="flex gap-2 justify-center mt-4">
             <button
               type="submit"
+              disabled={uploading}
               className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
             >
-              Atualizar
+              {uploading ? "Atualizando..." : "Atualizar"}
             </button>
             <button
               type="button"
