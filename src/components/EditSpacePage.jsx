@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { db, storage } from "../firebase";
 import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import defaultSpaceImage from "../uploads/field1.jpg";
 
 const EditSpacePage = () => {
   const { id } = useParams();
@@ -30,14 +31,17 @@ const EditSpacePage = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setForm(data);
-          setPreview(data.image);
+          if (data.image && data.image.startsWith("https://")) {
+            setPreview(data.image);
+          } else {
+            setPreview(defaultSpaceImage);
+          }
         } else {
           alert("Espaço não encontrado");
           navigate("/spaces");
         }
       } catch (error) {
-        console.error("Erro ao buscar espaço:", error);
-        alert("Erro ao carregar espaço.");
+        alert("Erro ao carregar espaço.", error);
       }
     };
 
@@ -49,7 +53,11 @@ const EditSpacePage = () => {
     if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
     if (!form.modality.trim()) newErrors.modality = "Modalidade é obrigatória";
     if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
-    if (!form.postCode.trim()) newErrors.postCode = "Código postal é obrigatório";
+    if (!form.postCode.trim()) {
+      newErrors.postCode = "Código postal é obrigatório";
+    } else if (!/^(\d{4}-\d{3})$/.test(form.postCode)) {
+      newErrors.postCode = "Formato de código postal inválido. Use XXXX-XXX.";
+    }
     if (!form.locality.trim()) newErrors.locality = "Localidade é obrigatória";
     if (!form.price.trim()) newErrors.price = "Preço é obrigatório";
     setErrors(newErrors);
@@ -116,12 +124,20 @@ const EditSpacePage = () => {
 
       navigate("/spaces");
     } catch (error) {
-      console.error("Erro ao atualizar espaço:", error);
-      alert("Erro ao atualizar espaço. Tente novamente.");
+      alert("Erro ao atualizar espaço. Tente novamente.", error);
     } finally {
       setUploading(false);
     }
   };
+
+  const fields = [
+    { name: "name", label: "Nome", type: "text" },
+    { name: "modality", label: "Modalidade", type: "text" },
+    { name: "address", label: "Morada", type: "text" },
+    { name: "postCode", label: "Código-postal", type: "text", pattern: "\\d{4}-\\d{3}", title: "O formato deve ser XXXX-XXX" },
+    { name: "locality", label: "Localidade", type: "text" },
+    { name: "price", label: "Preço por hora", type: "number" },
+  ];
 
   return (
     <div className="dark:text-gray-100">
@@ -151,18 +167,21 @@ const EditSpacePage = () => {
             />
           </div>
 
-          {["nome", "modalidade", "morada", "código-postal", "localidade", "preço"].map((field) => (
-            <div className="mb-3" key={field}>
+          {fields.map((field) => (
+            <div className="mb-3" key={field.name}>
               <input
-                name={field}
-                value={form[field]}
+                type={field.type}
+                name={field.name}
+                value={form[field.name]}
                 onChange={handleChange}
-                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
+                placeholder={`${field.label} *`}
+                pattern={field.pattern}
+                title={field.title}
                 className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                  errors[field] ? "border-red-500" : ""
+                  errors[field.name] ? "border-red-500" : ""
                 }`}
               />
-              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
             </div>
           ))}
 

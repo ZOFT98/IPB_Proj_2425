@@ -11,6 +11,7 @@ import {
   getDownloadURL,
 } from "firebase/storage";
 import { db, storage } from "../firebase";
+import defaultUserImage from "../uploads/default-profile.jpg";
 
 const EditUserPage = () => {
   const { id } = useParams();
@@ -35,13 +36,17 @@ const EditUserPage = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setForm(data);
-          setPreview(data.picture || "/default-profile.png");
+          if (data.picture && data.picture.startsWith("https://")) {
+            setPreview(data.picture);
+          } else {
+            setPreview(defaultUserImage);
+          }
         } else {
           alert("Usuário não encontrado");
           navigate("/users");
         }
       } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
+        alert("Erro ao carregar usuário.", error);
         navigate("/users");
       }
     };
@@ -124,8 +129,7 @@ const EditUserPage = () => {
       await updateDoc(doc(db, "users", id), updatedData);
       navigate("/users");
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
-      alert("Erro ao atualizar usuário.");
+      alert("Erro ao atualizar usuário.", error);
     }
   };
 
@@ -169,7 +173,7 @@ const EditUserPage = () => {
             { name: "name", type: "text", placeholder: "Nome *" },
             { name: "email", type: "email", placeholder: "Email *" },
             { name: "address", type: "text", placeholder: "Morada *" },
-            { name: "contact", type: "text", placeholder: "Contato *" },
+            { name: "contact", type: "text", placeholder: "Contacto *" },
           ].map(({ name, type, placeholder }) => (
             <div className="mb-3" key={name}>
               <input

@@ -30,8 +30,7 @@ const EditBookingPage = () => {
           navigate("/bookings");
         }
       } catch (error) {
-        console.error("Erro ao buscar reserva:", error);
-        alert("Erro ao carregar dados da reserva");
+        alert("Erro ao carregar dados da reserva", error);
         navigate("/bookings");
       } finally {
         setIsLoading(false);
@@ -74,8 +73,7 @@ const EditBookingPage = () => {
       });
       navigate("/bookings");
     } catch (error) {
-      console.error("Erro ao atualizar reserva:", error);
-      alert("Erro ao atualizar reserva");
+      alert("Erro ao atualizar reserva", error);
     }
   };
 

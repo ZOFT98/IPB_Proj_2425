@@ -20,7 +20,7 @@ const Bookings = () => {
       }));
       setBookings(data);
     } catch (error) {
-      console.error("Erro ao buscar reservas:", error);
+      alert("Erro ao carregar reservas.", error);
     }
   };
 
@@ -29,8 +29,7 @@ const Bookings = () => {
       await deleteDoc(doc(db, "bookings", id));
       setBookings(prev => prev.filter(booking => booking.id !== id));
     } catch (error) {
-      console.error("Erro ao apagar reserva:", error);
-      alert("Erro ao apagar. Tente novamente.");
+      alert("Erro ao apagar. Tente novamente.", error);
     }
   };
 

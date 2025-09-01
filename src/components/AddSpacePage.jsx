@@ -25,7 +25,11 @@ const AddSpacePage = () => {
     if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
     if (!form.modality.trim()) newErrors.modality = "Modalidade é obrigatória";
     if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
-    if (!form.postCode.trim()) newErrors.postCode = "Código postal é obrigatório";
+    if (!form.postCode.trim()) {
+      newErrors.postCode = "Código postal é obrigatório";
+    } else if (!/^(\d{4}-\d{3})$/.test(form.postCode)) {
+      newErrors.postCode = "Formato de código postal inválido. Use XXXX-XXX.";
+    }
     if (!form.locality.trim()) newErrors.locality = "Localidade é obrigatória";
     if (!form.price.trim()) newErrors.price = "Preço é obrigatório";
     setErrors(newErrors);
@@ -102,12 +106,20 @@ const AddSpacePage = () => {
       await setDoc(newDocRef, spaceData);
       navigate("/spaces");
     } catch (error) {
-      console.error("Erro ao criar espaço:", error);
-      alert("Erro ao criar espaço. Tente novamente.");
+      alert("Erro ao criar espaço. Tente novamente.", error);
     } finally {
       setUploading(false);
     }
   };
+
+  const fields = [
+    { name: "name", label: "Nome", type: "text" },
+    { name: "modality", label: "Modalidade", type: "text" },
+    { name: "address", label: "Morada", type: "text" },
+    { name: "postCode", label: "Código-postal", type: "text", pattern: "\\d{4}-\\d{3}", title: "O formato deve ser XXXX-XXX" },
+    { name: "locality", label: "Localidade", type: "text" },
+    { name: "price", label: "Preço por hora", type: "number" }
+  ];
 
   return (
     <div className="dark:text-gray-100">
@@ -132,16 +144,19 @@ const AddSpacePage = () => {
             />
           </div>
 
-          {["nome", "modalidade", "morada", "código-postal", "localidade", "preço"].map((field) => (
-            <div className="mb-3" key={field}>
+          {fields.map((field) => (
+            <div className="mb-3" key={field.name}>
               <input
-                name={field}
-                value={form[field]}
+                type={field.type}
+                name={field.name}
+                value={form[field.name]}
                 onChange={handleChange}
-                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field] ? 'border-red-500' : ''}`}
+                placeholder={`${field.label} *`}
+                pattern={field.pattern}
+                title={field.title}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? 'border-red-500' : ''}`}
               />
-              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
             </div>
           ))}
 

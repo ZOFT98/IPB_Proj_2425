@@ -21,7 +21,7 @@ const Tickets = () => {
       }));
       setTickets(docs);
     } catch (error) {
-      console.error("Erro ao buscar tickets:", error);
+      alert("Erro ao carregar tickets.", error);
     }
   };
 
@@ -34,7 +34,7 @@ const Tickets = () => {
       await deleteDoc(doc(db, "tickets", id));
       setTickets(prev => prev.filter((t) => t.id !== id));
     } catch (error) {
-      console.error("Erro ao deletar ticket:", error);
+      alert("Erro ao apagar. Tente novamente.", error);
     }
   };
 

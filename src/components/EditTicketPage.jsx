@@ -34,8 +34,7 @@ const EditTicketPage = () => {
           date: data.date?.toDate().toISOString().split('T')[0] || ''
         });
       } catch (error) {
-        console.error('Erro ao buscar ticket:', error);
-        alert('Erro ao carregar o ticket');
+        alert('Erro ao carregar o ticket', error);
         navigate('/tickets');
       } finally {
         setIsLoading(false);
@@ -78,7 +77,6 @@ const EditTicketPage = () => {
       await updateDoc(ticketRef, updatedTicket);
       navigate('/tickets');
     } catch (error) {
-      console.error('Erro ao atualizar ticket:', error);
       alert(`Erro: ${error.message}`);
     }
   };

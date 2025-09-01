@@ -98,12 +98,18 @@ const AddUserPage = () => {
       await addDoc(collection(db, "users"), userData);
       navigate("/users");
     } catch (error) {
-      console.error("Erro ao adicionar utilizador:", error);
       alert(`Erro: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const fields = [
+    { name: "name", label: "Nome", type: "text" },
+    { name: "email", label: "Email", type: "email" },
+    { name: "address", label: "Morada", type: "text" },
+    { name: "contact", label: "Contacto", type: "text" },
+  ];
 
   return (
     <div className="dark:text-gray-100">
@@ -131,17 +137,18 @@ const AddUserPage = () => {
             />
           </div>
 
-          {["nome", "email", "morada", "contacto"].map((field) => (
-            <div className="mb-3" key={field}>
+          {fields.map((field) => (
+            <div className="mb-3" key={field.name}>
               <input
-                name={field}
-                value={form[field]}
+                type={field.type}
+                name={field.name}
+                value={form[field.name]}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                placeholder={`${field.charAt(0).toUpperCase() + field.slice(1)} *`}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field] ? "border-red-500" : ""}`}
+                placeholder={`${field.label} *`}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
               />
-              {errors[field] && <p className="text-red-500 text-sm mt-1">{errors[field]}</p>}
+              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
             </div>
           ))}
 

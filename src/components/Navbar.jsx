@@ -6,9 +6,9 @@ import {
   FaSignOutAlt,
   FaFutbol,
   FaHome,
+  FaBuilding,
 } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
-import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../contexts/AuthContext"; 
 
 const Navbar = () => {
@@ -21,8 +21,7 @@ const Navbar = () => {
       await logout();
       navigate("/login");
     } catch (error) {
-      console.error("Logout error:", error);
-      alert("Erro ao fazer logout.");
+      alert("Erro ao fazer logout.", error);
     }
   };
 
@@ -47,10 +46,20 @@ const Navbar = () => {
 
       <nav className="flex flex-col gap-6">
         <Link
-          to="/spaces"
+          to="/home"
           className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
         >
           <FaHome className="mr-3" />
+          <div>
+            <h3 className="font-semibold">Inicio</h3>
+          </div>
+        </Link>
+
+        <Link
+          to="/spaces"
+          className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
+        >
+          <FaBuilding className="mr-3" />
           <div>
             <h3 className="font-semibold">Instalações</h3>
           </div>
@@ -95,7 +104,6 @@ const Navbar = () => {
           <FaSignOutAlt className="mr-2" />
           Logout
         </button>
-        <ThemeToggle />
       </div>
     </aside>
   );

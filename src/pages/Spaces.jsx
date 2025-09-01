@@ -20,7 +20,7 @@ const Spaces = () => {
       }));
       setSpaces(list);
     } catch (error) {
-      console.error("Error fetching spaces from Firestore:", error);
+      alert("Erro ao carregar instalações.", error);
     }
   };
 
@@ -29,7 +29,7 @@ const Spaces = () => {
       await deleteDoc(doc(db, "spaces", id));
       fetchSpaces();
     } catch (error) {
-      console.error("Error deleting space:", error);
+      alert("Erro ao apagar. Tente novamente.", error);
     }
   };
 
@@ -59,7 +59,7 @@ const Spaces = () => {
                 )}
                 <h3 className="font-medium text-lg">{space.name}</h3>
                 <p className="text-gray-500 dark:text-gray-400">
-                  {space.price} • {space.modality}
+                  {space.price}€/h • {space.modality}
                 </p>
               </div>
               

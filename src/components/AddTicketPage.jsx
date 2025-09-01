@@ -53,7 +53,6 @@ const AddTicketPage = () => {
       await addDoc(collection(db, "tickets"), ticketData);
       navigate("/tickets");
     } catch (error) {
-      console.error("Erro ao adicionar ticket:", error);
       alert(`Erro: ${error.message}`);
     } finally {
       setIsSubmitting(false);

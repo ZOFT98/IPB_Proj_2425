@@ -20,7 +20,8 @@ const Users = () => {
       }));
       setUsers(data);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      alert("Erro ao carregar utilizadores.", error);
+
     }
   };
 
@@ -29,7 +30,7 @@ const Users = () => {
       await deleteDoc(doc(db, "users", id));
       setUsers(users.filter((u) => u.id !== id));
     } catch (error) {
-      console.error("Error deleting user:", error);
+      alert("Erro ao apagar. Tente novamente.", error);
     }
   };
 

@@ -5,20 +5,6 @@
     <link rel="icon" type="image/svg+xml" href="/react.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GestSports - Plataforma de Gestão de Instalações Desportivas</title>
-    <script>
-      // Initialize theme ASAP to prevent FOUC
-      (function () {
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = savedTheme ? savedTheme : (prefersDark ? 'dark' : 'light');
-        if (theme === "dark") {
-          document.documentElement.classList.add("dark");
-        } else {
-          document.documentElement.classList.remove("dark");
-        }
-      })();
-    </script>
-
     <style>
       /* 💥 Hard reset for full control */
       html, body {

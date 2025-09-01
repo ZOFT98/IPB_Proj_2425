@@ -52,8 +52,7 @@ const AddBookingPage = () => {
       await addDoc(collection(db, "bookings"), docData);
       navigate("/bookings");
     } catch (error) {
-      console.error("Erro ao adicionar reserva:", error);
-      alert("Erro ao adicionar reserva. Verifique o console.");
+      alert("Erro ao adicionar reserva.", error);
     }
   };
 
