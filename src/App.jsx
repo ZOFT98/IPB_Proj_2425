@@ -18,6 +18,7 @@ import AddSpacePage from "./components/AddSpacePage";
 import EditSpacePage from "./components/EditSpacePage";
 import AddTicketPage from "./components/AddTicketPage";
 import EditTicketPage from "./components/EditTicketPage";
+import ProtectedRoute from "./router/ProtectedRoute";
 
 function App() {
   const location = useLocation();
@@ -36,19 +37,110 @@ function App() {
       <Navbar />
       <main className="flex-1 p-8">
         <Routes>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/spaces" element={<Spaces />} />
-          <Route path="/spaces/add" element={<AddSpacePage />} />
-          <Route path="/spaces/edit/:id" element={<EditSpacePage />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/add-user" element={<AddUserPage />} />
-          <Route path="/users/edit/:id" element={<EditUserPage />} />
-          <Route path="/bookings" element={<Bookings />} />
-          <Route path="/add-bookings" element={<AddBookingPage />} />
-          <Route path="/bookings/edit/:id" element={<EditBookingPage />} />
-          <Route path="/tickets" element={<Tickets />} />
-          <Route path="/add-ticket" element={<AddTicketPage />} />
-          <Route path="/tickets/edit/:id" element={<EditTicketPage />} />
+          <Route
+            path="/home"
+            element={
+              <ProtectedRoute>
+                <HomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spaces"
+            element={
+              <ProtectedRoute>
+                <Spaces />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spaces/add"
+            element={
+              <ProtectedRoute>
+                <AddSpacePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/spaces/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditSpacePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <Users />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-user"
+            element={
+              <ProtectedRoute>
+                <AddUserPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditUserPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                <Bookings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-bookings"
+            element={
+              <ProtectedRoute>
+                <AddBookingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditBookingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets"
+            element={
+              <ProtectedRoute>
+                <Tickets />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add-ticket"
+            element={
+              <ProtectedRoute>
+                <AddTicketPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tickets/edit/:id"
+            element={
+              <ProtectedRoute>
+                <EditTicketPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
     </div>

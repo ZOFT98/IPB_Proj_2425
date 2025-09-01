@@ -95,6 +95,7 @@ const HomePage = () => {
       const month = String(dayToFetch.getMonth() + 1).padStart(2, "0");
       const day = String(dayToFetch.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${day}`;
+
       const bookingsQuery = query(
         collection(db, "bookings"),
         where("date", "==", dateString),

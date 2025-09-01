@@ -2,19 +2,33 @@ import { FaFutbol } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { login } from "../firebase/authService";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       await login(email, password);
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+      } else {
+        localStorage.removeItem("rememberedEmail");
+      }
       navigate("/home");
     } catch (error) {
       alert("Erro ao iniciar sessão: " + error.message);
@@ -74,6 +88,8 @@ export default function LoginPage() {
             <input
               type="checkbox"
               id="remember"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded"
             />
             <label
