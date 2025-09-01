@@ -65,7 +65,7 @@ const AddUserPage = () => {
       const password = "123456";
       const firebaseUser = await registerUser(form.email, password);
 
-      let imageUrl = "/default-profile.png";
+      let imageUrl = "src/uploads/profile1.jpg";
       if (form.picture instanceof File) {
         const imageRef = ref(storage, `users/${Date.now()}-${form.picture.name}`);
         const uploadTask = uploadBytesResumable(imageRef, form.picture);
@@ -131,7 +131,7 @@ const AddUserPage = () => {
             />
           </div>
 
-          {["name", "email", "address", "contact"].map((field) => (
+          {["nome", "email", "morada", "contacto"].map((field) => (
             <div className="mb-3" key={field}>
               <input
                 name={field}

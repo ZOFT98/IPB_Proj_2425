@@ -48,7 +48,7 @@ const EditSpacePage = () => {
     const newErrors = {};
     if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
     if (!form.modality.trim()) newErrors.modality = "Modalidade é obrigatória";
-    if (!form.address.trim()) newErrors.address = "Endereço é obrigatório";
+    if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
     if (!form.postCode.trim()) newErrors.postCode = "Código postal é obrigatório";
     if (!form.locality.trim()) newErrors.locality = "Localidade é obrigatória";
     if (!form.price.trim()) newErrors.price = "Preço é obrigatório";
@@ -151,7 +151,7 @@ const EditSpacePage = () => {
             />
           </div>
 
-          {["name", "modality", "address", "postCode", "locality", "price"].map((field) => (
+          {["nome", "modalidade", "morada", "código-postal", "localidade", "preço"].map((field) => (
             <div className="mb-3" key={field}>
               <input
                 name={field}

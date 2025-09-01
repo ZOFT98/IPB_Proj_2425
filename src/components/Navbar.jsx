@@ -7,6 +7,7 @@ import {
   FaFutbol,
   FaHome,
 } from "react-icons/fa";
+import { FaBasketball } from "react-icons/fa6";
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "../contexts/AuthContext"; 
 
@@ -39,10 +40,8 @@ const Navbar = () => {
       <Link to="/home">
         <div className="flex items-center mb-8">
           <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
-          <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">
-            Espacos Desportivos
-          </h2>
-          <FaFutbol className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
+          <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">GestSports</h2>
+          <FaBasketball className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
         </div>
       </Link>
 

@@ -54,7 +54,7 @@ const Users = () => {
             >
               <div className="flex flex-col items-center mb-3">
                 <img
-                  src={user.picture || "/default-profile.png"}
+                  src={user.picture || "src/uploads/profile1.jpg"}
                   alt={user.name}
                   className="w-20 h-20 rounded-full object-cover mb-2"
                 />

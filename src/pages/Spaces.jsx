@@ -37,7 +37,7 @@ const Spaces = () => {
     <div className="flex dark:text-gray-100">
       <main className="flex-1">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Espaços Esportivos</h1>
+          <h1 className="text-2xl font-bold">Instalações Desportivos</h1>
           <button
             onClick={() => navigate("/spaces/add")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -52,7 +52,7 @@ const Spaces = () => {
               <div className="flex flex-col items-center mb-3">
                 {space.image && (
                   <img 
-                    src={space.image} 
+                    src={space.image || 'src/uploads/field1.jpg'} 
                     alt={space.name}
                     className="w-full h-48 object-cover rounded mb-2"
                   />

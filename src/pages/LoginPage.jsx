@@ -40,9 +40,7 @@ export default function LoginPage() {
         {/* Top Title */}
         <div className="flex items-center justify-center mb-8">
           <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-            Espacos Desportivos
-          </h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">GestSports</h2>
           <FaBasketball className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
         </div>
 
