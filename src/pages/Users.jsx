@@ -21,7 +21,6 @@ const Users = () => {
       setUsers(data);
     } catch (error) {
       alert("Erro ao carregar utilizadores.", error);
-
     }
   };
 
@@ -72,7 +71,8 @@ const Users = () => {
                 <span className="font-semibold">Contacto:</span> {user.contact}
               </p>
               <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-semibold">Data de Nascimento:</span> {user.birthdate}
+                <span className="font-semibold">Data de Nascimento:</span>{" "}
+                {user.birthdate}
               </p>
               <p className="text-gray-500 dark:text-gray-400">
                 <span className="font-semibold">Gênero:</span> {user.gender}

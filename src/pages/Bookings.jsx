@@ -14,9 +14,9 @@ const Bookings = () => {
   const fetchBookings = async () => {
     try {
       const snapshot = await getDocs(collection(db, "bookings"));
-      const data = snapshot.docs.map(doc => ({
+      const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setBookings(data);
     } catch (error) {
@@ -27,7 +27,7 @@ const Bookings = () => {
   const handleDelete = async (id) => {
     try {
       await deleteDoc(doc(db, "bookings", id));
-      setBookings(prev => prev.filter(booking => booking.id !== id));
+      setBookings((prev) => prev.filter((booking) => booking.id !== id));
     } catch (error) {
       alert("Erro ao apagar. Tente novamente.", error);
     }
@@ -55,37 +55,42 @@ const Bookings = () => {
               <div className="flex flex-col items-center mb-3">
                 <h3 className="font-medium text-lg">{booking.title}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(booking.date).toLocaleDateString("pt-PT")} • {booking.startTime} - {booking.endTime}
+                  {new Date(booking.date).toLocaleDateString("pt-PT")} •{" "}
+                  {booking.startTime} - {booking.endTime}
                 </p>
               </div>
 
               <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Espaço Desportivo:</span> {booking.space}
+                <span className="font-medium">Espaço Desportivo:</span>{" "}
+                {booking.space}
               </p>
 
               <div className="space-y-2">
                 <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">Descrição:</span> {booking.description}
+                  <span className="font-medium">Descrição:</span>{" "}
+                  {booking.description}
                 </p>
                 <p
                   className={`text-sm font-medium ${
                     booking.status === "confirmed"
                       ? "text-green-500"
                       : booking.status === "cancelled"
-                      ? "text-red-500"
-                      : "text-yellow-500"
+                        ? "text-red-500"
+                        : "text-yellow-500"
                   }`}
                 >
                   Status: {booking.status}
                 </p>
                 {booking.createdAt && (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Criado em: {new Date(booking.createdAt).toLocaleString("pt-PT")}
+                    Criado em:{" "}
+                    {new Date(booking.createdAt).toLocaleString("pt-PT")}
                   </p>
                 )}
                 {booking.updatedAt && (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Atualizado em: {new Date(booking.updatedAt).toLocaleString("pt-PT")}
+                    Atualizado em:{" "}
+                    {new Date(booking.updatedAt).toLocaleString("pt-PT")}
                   </p>
                 )}
               </div>

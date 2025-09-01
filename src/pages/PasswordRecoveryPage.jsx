@@ -7,26 +7,25 @@ export default function PasswordRecoveryPage() {
   const [email, setEmail] = useState("");
 
   const handlePasswordRecoveryRequest = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    await resetPassword(email);
-    alert("Se o email existir, um link de recuperação foi enviado.");
-    navigate("/");
-  } catch (error) {
-    alert("Erro ao enviar email de recuperação: " + error.message);
-  }
-};
+    try {
+      await resetPassword(email);
+      alert("Se o email existir, um link de recuperação foi enviado.");
+      navigate("/");
+    } catch (error) {
+      alert("Erro ao enviar email de recuperação: " + error.message);
+    }
+  };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{ 
-        backgroundImage: "url('/uploads/background.jpg')"
+      style={{
+        backgroundImage: "url('/uploads/background.jpg')",
       }}
     >
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center mx-4">
-        
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
           Recuperar Senha
         </h1>
@@ -36,7 +35,6 @@ export default function PasswordRecoveryPage() {
         </p>
 
         <form onSubmit={handlePasswordRecoveryRequest} className="space-y-4">
-          
           <div>
             <input
               type="email"

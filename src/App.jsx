@@ -25,7 +25,6 @@ function App() {
   const isFullScreen = fullScreenRoutes.includes(location.pathname);
 
   return isFullScreen ? (
-    
     <Routes>
       <Route path="/" element={<LoginPage />} />
       <Route path="/login" element={<LoginPage />} />
@@ -33,7 +32,6 @@ function App() {
       <Route path="/password-recovery" element={<PasswordRecoveryPage />} />
     </Routes>
   ) : (
-    
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Navbar />
       <main className="flex-1 p-8">

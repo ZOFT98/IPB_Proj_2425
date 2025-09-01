@@ -1,12 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
-import {
-  collection,
-  getDocs,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -15,9 +10,9 @@ const Tickets = () => {
   const fetchTickets = async () => {
     try {
       const snapshot = await getDocs(collection(db, "tickets"));
-      const docs = snapshot.docs.map(doc => ({
+      const docs = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setTickets(docs);
     } catch (error) {
@@ -32,7 +27,7 @@ const Tickets = () => {
   const handleDelete = async (id) => {
     try {
       await deleteDoc(doc(db, "tickets", id));
-      setTickets(prev => prev.filter((t) => t.id !== id));
+      setTickets((prev) => prev.filter((t) => t.id !== id));
     } catch (error) {
       alert("Erro ao apagar. Tente novamente.", error);
     }
@@ -93,20 +88,32 @@ const Tickets = () => {
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Data:</span>{" "}
-                  {ticket.date ? new Date(ticket.date.seconds * 1000).toLocaleDateString() : "-"}
+                  {ticket.date
+                    ? new Date(ticket.date.seconds * 1000).toLocaleDateString()
+                    : "-"}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Descrição:</span> {ticket.description}
+                  <span className="font-semibold">Descrição:</span>{" "}
+                  {ticket.description}
                 </p>
                 <p className={`text-sm mt-2 ${getStatusColor(ticket.status)}`}>
-                  <span className="font-semibold">Status:</span> {getStatusText(ticket.status)}
+                  <span className="font-semibold">Status:</span>{" "}
+                  {getStatusText(ticket.status)}
                 </p>
                 <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Criado em: {ticket.createdAt ? new Date(ticket.createdAt.seconds * 1000).toLocaleString("pt-PT") : "-"}
+                  Criado em:{" "}
+                  {ticket.createdAt
+                    ? new Date(ticket.createdAt.seconds * 1000).toLocaleString(
+                        "pt-PT",
+                      )
+                    : "-"}
                 </p>
                 {ticket.updatedAt && (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Atualizado em: {new Date(ticket.updatedAt.seconds * 1000).toLocaleString("pt-PT")}
+                    Atualizado em:{" "}
+                    {new Date(ticket.updatedAt.seconds * 1000).toLocaleString(
+                      "pt-PT",
+                    )}
                   </p>
                 )}
               </div>

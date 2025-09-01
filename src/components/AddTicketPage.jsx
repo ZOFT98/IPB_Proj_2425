@@ -22,7 +22,8 @@ const AddTicketPage = () => {
     if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
     if (!form.space.trim()) newErrors.space = "Espaço é obrigatório";
     if (!form.date) newErrors.date = "Data é obrigatória";
-    if (!form.description.trim()) newErrors.description = "Descrição é obrigatória";
+    if (!form.description.trim())
+      newErrors.description = "Descrição é obrigatória";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -62,8 +63,13 @@ const AddTicketPage = () => {
   return (
     <div className="dark:text-gray-100">
       <div className="mx-auto max-w-md px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Ticket</h1>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Adicionar Ticket
+          </h1>
 
           {/* Title */}
           <div className="mb-3">
@@ -74,7 +80,9 @@ const AddTicketPage = () => {
               placeholder="Título *"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           {/* Name */}
@@ -86,7 +94,9 @@ const AddTicketPage = () => {
               placeholder="Nome *"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? "border-red-500" : ""}`}
             />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
           </div>
 
           {/* Space */}
@@ -98,7 +108,9 @@ const AddTicketPage = () => {
               placeholder="Espaço *"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
             />
-            {errors.space && <p className="text-red-500 text-sm mt-1">{errors.space}</p>}
+            {errors.space && (
+              <p className="text-red-500 text-sm mt-1">{errors.space}</p>
+            )}
           </div>
 
           {/* Date */}
@@ -110,7 +122,9 @@ const AddTicketPage = () => {
               onChange={handleChange}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.date ? "border-red-500" : ""}`}
             />
-            {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+            {errors.date && (
+              <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+            )}
           </div>
 
           {/* Description */}
@@ -123,7 +137,9 @@ const AddTicketPage = () => {
               rows="3"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? "border-red-500" : ""}`}
             />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+            )}
           </div>
 
           {/* Status */}

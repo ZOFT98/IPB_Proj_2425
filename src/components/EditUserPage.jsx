@@ -1,15 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  doc,
-  getDoc,
-  updateDoc,
-} from "firebase/firestore";
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase";
 import defaultUserImage from "../uploads/default-profile.jpg";
 
@@ -59,7 +51,8 @@ const EditUserPage = () => {
     if (!form.email.trim()) newErrors.email = "Email é obrigatório";
     if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
     if (!form.contact.trim()) newErrors.contact = "Contato é obrigatório";
-    if (!form.birthdate) newErrors.birthdate = "Data de nascimento é obrigatória";
+    if (!form.birthdate)
+      newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
 
     setErrors(newErrors);
@@ -100,7 +93,10 @@ const EditUserPage = () => {
       let pictureUrl = form.picture;
 
       if (form.picture instanceof File) {
-        const imageRef = ref(storage, `users/${Date.now()}-${form.picture.name}`);
+        const imageRef = ref(
+          storage,
+          `users/${Date.now()}-${form.picture.name}`,
+        );
         const uploadTask = uploadBytesResumable(imageRef, form.picture);
 
         await new Promise((resolve, reject) => {
@@ -111,7 +107,7 @@ const EditUserPage = () => {
             async () => {
               pictureUrl = await getDownloadURL(uploadTask.snapshot.ref);
               resolve();
-            }
+            },
           );
         });
       }
@@ -140,7 +136,9 @@ const EditUserPage = () => {
           onSubmit={handleSubmit}
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
         >
-          <h1 className="text-2xl font-bold mb-6 text-center">Editar Usuário</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Editar Usuário
+          </h1>
 
           {/* Avatar */}
           <div className="mb-4 flex flex-col items-center">
@@ -186,7 +184,9 @@ const EditUserPage = () => {
                   errors[name] ? "border-red-500" : ""
                 }`}
               />
-              {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
+              {errors[name] && (
+                <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+              )}
             </div>
           ))}
 
@@ -201,7 +201,9 @@ const EditUserPage = () => {
                 errors.birthdate ? "border-red-500" : ""
               }`}
             />
-            {errors.birthdate && <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>}
+            {errors.birthdate && (
+              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
+            )}
           </div>
 
           {/* Gender */}
@@ -218,7 +220,9 @@ const EditUserPage = () => {
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
-            {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+            {errors.gender && (
+              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+            )}
           </div>
 
           {/* Buttons */}

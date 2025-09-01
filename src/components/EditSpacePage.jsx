@@ -16,7 +16,7 @@ const EditSpacePage = () => {
     locality: "",
     price: "",
     image: "",
-    available: true
+    available: true,
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
@@ -99,7 +99,10 @@ const EditSpacePage = () => {
       let imageUrl = form.image;
 
       if (form.image instanceof File) {
-        const imageRef = ref(storage, `spaces/${Date.now()}-${form.image.name}`);
+        const imageRef = ref(
+          storage,
+          `spaces/${Date.now()}-${form.image.name}`,
+        );
         const uploadTask = uploadBytesResumable(imageRef, form.image);
 
         await new Promise((resolve, reject) => {
@@ -110,7 +113,7 @@ const EditSpacePage = () => {
             async () => {
               imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
               resolve();
-            }
+            },
           );
         });
       }
@@ -134,7 +137,13 @@ const EditSpacePage = () => {
     { name: "name", label: "Nome", type: "text" },
     { name: "modality", label: "Modalidade", type: "text" },
     { name: "address", label: "Morada", type: "text" },
-    { name: "postCode", label: "Código-postal", type: "text", pattern: "\\d{4}-\\d{3}", title: "O formato deve ser XXXX-XXX" },
+    {
+      name: "postCode",
+      label: "Código-postal",
+      type: "text",
+      pattern: "\\d{4}-\\d{3}",
+      title: "O formato deve ser XXXX-XXX",
+    },
     { name: "locality", label: "Localidade", type: "text" },
     { name: "price", label: "Preço por hora", type: "number" },
   ];
@@ -142,12 +151,21 @@ const EditSpacePage = () => {
   return (
     <div className="dark:text-gray-100">
       <div className="mx-auto max-w-md px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">Editar Espaço Esportivo</h1>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Editar Espaço Esportivo
+          </h1>
 
           <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img src={preview} alt="Preview" className="w-32 h-32 rounded-lg object-cover mb-2" />
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-32 h-32 rounded-lg object-cover mb-2"
+              />
             ) : (
               <div className="w-32 h-32 bg-gray-200 flex items-center justify-center mb-2 rounded-lg">
                 <span className="text-gray-500">Sem imagem</span>
@@ -181,7 +199,11 @@ const EditSpacePage = () => {
                   errors[field.name] ? "border-red-500" : ""
                 }`}
               />
-              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
+              {errors[field.name] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors[field.name]}
+                </p>
+              )}
             </div>
           ))}
 

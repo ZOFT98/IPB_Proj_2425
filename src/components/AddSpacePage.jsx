@@ -5,7 +5,7 @@ import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 const AddSpacePage = () => {
-  const [form, setForm] = useState({ 
+  const [form, setForm] = useState({
     name: "",
     modality: "",
     address: "",
@@ -13,7 +13,7 @@ const AddSpacePage = () => {
     locality: "",
     price: "",
     image: null,
-    available: true
+    available: true,
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
@@ -38,9 +38,9 @@ const AddSpacePage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -48,17 +48,17 @@ const AddSpacePage = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione um arquivo de imagem válido');
+    if (!file.type.startsWith("image/")) {
+      alert("Por favor, selecione um arquivo de imagem válido");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('A imagem deve ser menor que 5MB');
+      alert("A imagem deve ser menor que 5MB");
       return;
     }
 
-    setForm({...form, image: file});
+    setForm({ ...form, image: file });
     setPreview(URL.createObjectURL(file));
   };
 
@@ -74,7 +74,10 @@ const AddSpacePage = () => {
       let imageUrl = "src/uploads/field1.jpg";
 
       if (form.image instanceof File) {
-        const imageRef = ref(storage, `spaces/${newDocRef.id}-${form.image.name}`);
+        const imageRef = ref(
+          storage,
+          `spaces/${newDocRef.id}-${form.image.name}`,
+        );
         const uploadTask = uploadBytesResumable(imageRef, form.image);
 
         await new Promise((resolve, reject) => {
@@ -85,7 +88,7 @@ const AddSpacePage = () => {
             async () => {
               imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
               resolve();
-            }
+            },
           );
         });
       }
@@ -100,7 +103,7 @@ const AddSpacePage = () => {
         price: form.price,
         image: imageUrl,
         available: form.available,
-        createdAt: Timestamp.now()
+        createdAt: Timestamp.now(),
       };
 
       await setDoc(newDocRef, spaceData);
@@ -116,20 +119,35 @@ const AddSpacePage = () => {
     { name: "name", label: "Nome", type: "text" },
     { name: "modality", label: "Modalidade", type: "text" },
     { name: "address", label: "Morada", type: "text" },
-    { name: "postCode", label: "Código-postal", type: "text", pattern: "\\d{4}-\\d{3}", title: "O formato deve ser XXXX-XXX" },
+    {
+      name: "postCode",
+      label: "Código-postal",
+      type: "text",
+      pattern: "\\d{4}-\\d{3}",
+      title: "O formato deve ser XXXX-XXX",
+    },
     { name: "locality", label: "Localidade", type: "text" },
-    { name: "price", label: "Preço por hora", type: "number" }
+    { name: "price", label: "Preço por hora", type: "number" },
   ];
 
   return (
     <div className="dark:text-gray-100">
       <div className="mx-auto max-w-md px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Espaço Esportivo</h1>
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Adicionar Espaço Esportivo
+          </h1>
 
           <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img src={preview} alt="Preview" className="w-32 h-32 rounded-lg object-cover mb-2" />
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-32 h-32 rounded-lg object-cover mb-2"
+              />
             ) : (
               <div className="w-32 h-32 rounded-lg bg-gray-200 mb-2 flex items-center justify-center">
                 <span className="text-gray-500">Sem imagem</span>
@@ -154,9 +172,13 @@ const AddSpacePage = () => {
                 placeholder={`${field.label} *`}
                 pattern={field.pattern}
                 title={field.title}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? 'border-red-500' : ''}`}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
               />
-              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
+              {errors[field.name] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors[field.name]}
+                </p>
+              )}
             </div>
           ))}
 
@@ -165,7 +187,9 @@ const AddSpacePage = () => {
               type="checkbox"
               name="available"
               checked={form.available}
-              onChange={(e) => setForm({...form, available: e.target.checked})}
+              onChange={(e) =>
+                setForm({ ...form, available: e.target.checked })
+              }
               className="w-4 h-4 mr-2"
               id="availableCheckbox"
             />

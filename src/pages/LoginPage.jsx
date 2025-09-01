@@ -14,10 +14,10 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      await login(email, password); 
-      navigate("/home"); 
+      await login(email, password);
+      navigate("/home");
     } catch (error) {
-      alert("Erro ao iniciar sessão: " + error.message); 
+      alert("Erro ao iniciar sessão: " + error.message);
     }
   };
 
@@ -34,13 +34,14 @@ export default function LoginPage() {
       className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
       style={{ backgroundImage: "url('/uploads/background.jpg')" }}
     >
-
       {/* Login Card */}
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center relative z-10">
         {/* Top Title */}
         <div className="flex items-center justify-center mb-8">
           <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">GestSports</h2>
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100">
+            GestSports
+          </h2>
           <FaBasketball className="text-2xl ml-5 text-gray-800 dark:text-gray-100" />
         </div>
 

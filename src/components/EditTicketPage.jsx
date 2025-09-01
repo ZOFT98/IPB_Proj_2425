@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { db } from '../firebase';
-import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { db } from "../firebase";
+import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
 
 const EditTicketPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    title: '',
-    name: '',
-    space: '',
-    date: '',
-    description: '',
-    status: 'pending'
+    title: "",
+    name: "",
+    space: "",
+    date: "",
+    description: "",
+    status: "pending",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -20,22 +20,22 @@ const EditTicketPage = () => {
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const ticketRef = doc(db, 'tickets', id);
+        const ticketRef = doc(db, "tickets", id);
         const snapshot = await getDoc(ticketRef);
 
         if (!snapshot.exists()) {
-          alert('Ticket não encontrado');
-          return navigate('/tickets');
+          alert("Ticket não encontrado");
+          return navigate("/tickets");
         }
 
         const data = snapshot.data();
         setForm({
           ...data,
-          date: data.date?.toDate().toISOString().split('T')[0] || ''
+          date: data.date?.toDate().toISOString().split("T")[0] || "",
         });
       } catch (error) {
-        alert('Erro ao carregar o ticket', error);
-        navigate('/tickets');
+        alert("Erro ao carregar o ticket", error);
+        navigate("/tickets");
       } finally {
         setIsLoading(false);
       }
@@ -46,11 +46,11 @@ const EditTicketPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!form.title.trim()) newErrors.title = 'Título é obrigatório';
-    if (!form.name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!form.space.trim()) newErrors.space = 'Espaço é obrigatório';
-    if (!form.date) newErrors.date = 'Data é obrigatória';
-    
+    if (!form.title.trim()) newErrors.title = "Título é obrigatório";
+    if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
+    if (!form.space.trim()) newErrors.space = "Espaço é obrigatório";
+    if (!form.date) newErrors.date = "Data é obrigatória";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -59,7 +59,7 @@ const EditTicketPage = () => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
@@ -68,14 +68,14 @@ const EditTicketPage = () => {
     if (!validateForm()) return;
 
     try {
-      const ticketRef = doc(db, 'tickets', id);
+      const ticketRef = doc(db, "tickets", id);
       const updatedTicket = {
         ...form,
         date: new Date(form.date),
-        updatedAt: Timestamp.now()
+        updatedAt: Timestamp.now(),
       };
       await updateDoc(ticketRef, updatedTicket);
-      navigate('/tickets');
+      navigate("/tickets");
     } catch (error) {
       alert(`Erro: ${error.message}`);
     }
@@ -94,7 +94,10 @@ const EditTicketPage = () => {
       <div className="mx-auto max-w-md px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-center">Editar Ticket</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
           {/* Title Field */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Título *</label>
@@ -102,9 +105,11 @@ const EditTicketPage = () => {
               name="title"
               value={form.title}
               onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           {/* Name Field */}
@@ -114,9 +119,11 @@ const EditTicketPage = () => {
               name="name"
               value={form.name}
               onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? "border-red-500" : ""}`}
             />
-            {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+            {errors.name && (
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+            )}
           </div>
 
           {/* Space Field */}
@@ -126,9 +133,11 @@ const EditTicketPage = () => {
               name="space"
               value={form.space}
               onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
             />
-            {errors.space && <p className="text-red-500 text-sm mt-1">{errors.space}</p>}
+            {errors.space && (
+              <p className="text-red-500 text-sm mt-1">{errors.space}</p>
+            )}
           </div>
 
           {/* Date and Status Fields */}
@@ -140,9 +149,11 @@ const EditTicketPage = () => {
                 name="date"
                 value={form.date}
                 onChange={handleChange}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.date ? 'border-red-500' : ''}`}
+                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.date ? "border-red-500" : ""}`}
               />
-              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+              {errors.date && (
+                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Status</label>
@@ -168,9 +179,11 @@ const EditTicketPage = () => {
               value={form.description}
               onChange={handleChange}
               rows={3}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? 'border-red-500' : ''}`}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? "border-red-500" : ""}`}
             />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+            {errors.description && (
+              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+            )}
           </div>
 
           {/* Form Actions */}
@@ -183,7 +196,7 @@ const EditTicketPage = () => {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/tickets')}
+              onClick={() => navigate("/tickets")}
               className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
             >
               Cancelar

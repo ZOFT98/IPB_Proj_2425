@@ -13,7 +13,7 @@ const EditBookingPage = () => {
     startTime: "",
     endTime: "",
     description: "",
-    status: "pending"
+    status: "pending",
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +69,7 @@ const EditBookingPage = () => {
       const docRef = doc(db, "bookings", id);
       await updateDoc(docRef, {
         ...form,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       });
       navigate("/bookings");
     } catch (error) {
@@ -90,7 +90,10 @@ const EditBookingPage = () => {
       <div className="mx-auto max-w-md px-4 py-8">
         <h1 className="text-2xl font-bold mb-6 text-center">Editar Reserva</h1>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
           {/* Título */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">Título *</label>
@@ -102,12 +105,16 @@ const EditBookingPage = () => {
                 errors.title ? "border-red-500" : ""
               }`}
             />
-            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+            {errors.title && (
+              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+            )}
           </div>
 
           {/* Espaço */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Espaço Desportivo *</label>
+            <label className="block text-sm font-medium mb-1">
+              Espaço Desportivo *
+            </label>
             <input
               name="space"
               value={form.space}
@@ -116,7 +123,9 @@ const EditBookingPage = () => {
                 errors.space ? "border-red-500" : ""
               }`}
             />
-            {errors.space && <p className="text-red-500 text-sm mt-1">{errors.space}</p>}
+            {errors.space && (
+              <p className="text-red-500 text-sm mt-1">{errors.space}</p>
+            )}
           </div>
 
           {/* Data e status */}
@@ -132,7 +141,9 @@ const EditBookingPage = () => {
                   errors.date ? "border-red-500" : ""
                 }`}
               />
-              {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+              {errors.date && (
+                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">Status</label>
@@ -152,7 +163,9 @@ const EditBookingPage = () => {
           {/* Horários */}
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Hora Início *</label>
+              <label className="block text-sm font-medium mb-1">
+                Hora Início *
+              </label>
               <input
                 type="time"
                 name="startTime"
@@ -162,10 +175,14 @@ const EditBookingPage = () => {
                   errors.startTime ? "border-red-500" : ""
                 }`}
               />
-              {errors.startTime && <p className="text-red-500 text-sm mt-1">{errors.startTime}</p>}
+              {errors.startTime && (
+                <p className="text-red-500 text-sm mt-1">{errors.startTime}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Hora Fim *</label>
+              <label className="block text-sm font-medium mb-1">
+                Hora Fim *
+              </label>
               <input
                 type="time"
                 name="endTime"
@@ -175,7 +192,9 @@ const EditBookingPage = () => {
                   errors.endTime ? "border-red-500" : ""
                 }`}
               />
-              {errors.endTime && <p className="text-red-500 text-sm mt-1">{errors.endTime}</p>}
+              {errors.endTime && (
+                <p className="text-red-500 text-sm mt-1">{errors.endTime}</p>
+              )}
             </div>
           </div>
 

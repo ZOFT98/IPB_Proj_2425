@@ -27,7 +27,8 @@ const AddUserPage = () => {
     if (!form.email.trim()) newErrors.email = "Email é obrigatório";
     if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
     if (!form.contact.trim()) newErrors.contact = "Contato é obrigatório";
-    if (!form.birthdate) newErrors.birthdate = "Data de nascimento é obrigatória";
+    if (!form.birthdate)
+      newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -67,19 +68,17 @@ const AddUserPage = () => {
 
       let imageUrl = "src/uploads/profile1.jpg";
       if (form.picture instanceof File) {
-        const imageRef = ref(storage, `users/${Date.now()}-${form.picture.name}`);
+        const imageRef = ref(
+          storage,
+          `users/${Date.now()}-${form.picture.name}`,
+        );
         const uploadTask = uploadBytesResumable(imageRef, form.picture);
 
         await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            null,
-            reject,
-            async () => {
-              imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            }
-          );
+          uploadTask.on("state_changed", null, reject, async () => {
+            imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            resolve();
+          });
         });
       }
 
@@ -92,7 +91,7 @@ const AddUserPage = () => {
         birthdate: form.birthdate,
         gender: form.gender,
         picture: imageUrl,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
 
       await addDoc(collection(db, "users"), userData);
@@ -118,11 +117,17 @@ const AddUserPage = () => {
           onSubmit={handleSubmit}
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
         >
-          <h1 className="text-2xl font-bold mb-6 text-center">Adicionar Utilizador</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center">
+            Adicionar Utilizador
+          </h1>
 
           <div className="mb-4 flex flex-col items-center">
             {preview ? (
-              <img src={preview} alt="Preview" className="w-32 h-32 rounded-full object-cover mb-2" />
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-32 h-32 rounded-full object-cover mb-2"
+              />
             ) : (
               <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
                 <span className="text-gray-500">Sem imagem</span>
@@ -148,7 +153,11 @@ const AddUserPage = () => {
                 placeholder={`${field.label} *`}
                 className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
               />
-              {errors[field.name] && <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>}
+              {errors[field.name] && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors[field.name]}
+                </p>
+              )}
             </div>
           ))}
 
@@ -161,7 +170,9 @@ const AddUserPage = () => {
               disabled={isSubmitting}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.birthdate ? "border-red-500" : ""}`}
             />
-            {errors.birthdate && <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>}
+            {errors.birthdate && (
+              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
+            )}
           </div>
 
           <div className="mb-4">
@@ -176,7 +187,9 @@ const AddUserPage = () => {
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
-            {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+            {errors.gender && (
+              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+            )}
           </div>
 
           <div className="flex gap-2 justify-center mt-4">

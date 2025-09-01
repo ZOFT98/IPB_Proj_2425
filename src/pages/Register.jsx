@@ -10,31 +10,30 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleRegister = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (password !== confirmPassword) {
-    alert("As passwords não coincidem!");
-    return;
-  }
+    if (password !== confirmPassword) {
+      alert("As passwords não coincidem!");
+      return;
+    }
 
-  try {
-    await register(email, password); 
-    alert("Conta criada com sucesso!");
-    navigate("/login");
-  } catch (error) {
-    alert("Erro ao criar conta: " + error.message);
-  }
-};
+    try {
+      await register(email, password);
+      alert("Conta criada com sucesso!");
+      navigate("/login");
+    } catch (error) {
+      alert("Erro ao criar conta: " + error.message);
+    }
+  };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
-      style={{ 
-        backgroundImage: "url('/uploads/background.jpg')"
+      style={{
+        backgroundImage: "url('/uploads/background.jpg')",
       }}
     >
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-        
         <div className="p-8">
           <h1 className="text-2xl font-bold text-black text-center">
             Criar Conta

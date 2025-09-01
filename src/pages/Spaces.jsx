@@ -14,9 +14,9 @@ const Spaces = () => {
   const fetchSpaces = async () => {
     try {
       const snapshot = await getDocs(collection(db, "spaces"));
-      const list = snapshot.docs.map(doc => ({
+      const list = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setSpaces(list);
     } catch (error) {
@@ -47,12 +47,15 @@ const Spaces = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {spaces.map(space => (
-            <div key={space.id} className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition">
+          {spaces.map((space) => (
+            <div
+              key={space.id}
+              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition"
+            >
               <div className="flex flex-col items-center mb-3">
                 {space.image && (
-                  <img 
-                    src={space.image || 'src/uploads/field1.jpg'} 
+                  <img
+                    src={space.image || "src/uploads/field1.jpg"}
                     alt={space.name}
                     className="w-full h-48 object-cover rounded mb-2"
                   />
@@ -62,7 +65,7 @@ const Spaces = () => {
                   {space.price}€/h • {space.modality}
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <p className="text-gray-500 dark:text-gray-400">
                   <span className="font-medium">Morada:</span> {space.address}
@@ -70,10 +73,12 @@ const Spaces = () => {
                 <p className="text-gray-500 dark:text-gray-400">
                   {space.postCode} • {space.locality}
                 </p>
-                <p className={`text-sm ${
-                  space.available ? 'text-green-500' : 'text-red-500'
-                }`}>
-                  {space.available ? 'Disponível' : 'Indisponível'}
+                <p
+                  className={`text-sm ${
+                    space.available ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {space.available ? "Disponível" : "Indisponível"}
                 </p>
               </div>
 
