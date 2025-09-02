@@ -73,11 +73,18 @@ const AddTicketPage = () => {
 
           {/* Title */}
           <div className="mb-3">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Título *
+            </label>
             <input
+              id="title"
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="Título *"
+              placeholder="Título"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
             />
             {errors.title && (
@@ -87,11 +94,18 @@ const AddTicketPage = () => {
 
           {/* Name */}
           <div className="mb-3">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Nome *
+            </label>
             <input
+              id="name"
               name="name"
               value={form.name}
               onChange={handleChange}
-              placeholder="Nome *"
+              placeholder="Nome"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? "border-red-500" : ""}`}
             />
             {errors.name && (
@@ -101,11 +115,18 @@ const AddTicketPage = () => {
 
           {/* Space */}
           <div className="mb-3">
+            <label
+              htmlFor="space"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Espaço *
+            </label>
             <input
+              id="space"
               name="space"
               value={form.space}
               onChange={handleChange}
-              placeholder="Espaço *"
+              placeholder="Espaço"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
             />
             {errors.space && (
@@ -115,7 +136,14 @@ const AddTicketPage = () => {
 
           {/* Date */}
           <div className="mb-3">
+            <label
+              htmlFor="date"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Data *
+            </label>
             <input
+              id="date"
               name="date"
               type="date"
               value={form.date}
@@ -129,11 +157,18 @@ const AddTicketPage = () => {
 
           {/* Description */}
           <div className="mb-3">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Descrição *
+            </label>
             <textarea
+              id="description"
               name="description"
               value={form.description}
               onChange={handleChange}
-              placeholder="Descrição *"
+              placeholder="Descrição"
               rows="3"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? "border-red-500" : ""}`}
             />
@@ -144,7 +179,14 @@ const AddTicketPage = () => {
 
           {/* Status */}
           <div className="mb-4">
+            <label
+              htmlFor="status"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Status
+            </label>
             <select
+              id="status"
               name="status"
               value={form.status}
               onChange={handleChange}

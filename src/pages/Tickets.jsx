@@ -2,10 +2,50 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaUser,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaInfoCircle,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHourglassHalf,
+  FaExclamationCircle,
+} from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
+
+const statusInfo = {
+  completed: {
+    text: "Concluído",
+    icon: <FaCheckCircle className="mr-2" />,
+    color: "text-green-500",
+  },
+  cancelled: {
+    text: "Cancelado",
+    icon: <FaTimesCircle className="mr-2" />,
+    color: "text-red-500",
+  },
+  in_progress: {
+    text: "Em Progresso",
+    icon: <FaHourglassHalf className="mr-2" />,
+    color: "text-yellow-500",
+  },
+  pending: {
+    text: "Pendente",
+    icon: <FaExclamationCircle className="mr-2" />,
+    color: "text-blue-500",
+  },
+};
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser && currentUser.role === "admin";
+  const isSuperAdmin = currentUser && currentUser.role === "superadmin";
 
   const fetchTickets = async () => {
     try {
@@ -33,107 +73,84 @@ const Tickets = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completed":
-        return "text-green-500";
-      case "cancelled":
-        return "text-red-500";
-      case "in_progress":
-        return "text-yellow-500";
-      default:
-        return "text-blue-500";
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "completed":
-        return "Concluído";
-      case "cancelled":
-        return "Cancelado";
-      case "in_progress":
-        return "Em progresso";
-      default:
-        return "Pendente";
-    }
-  };
-
   return (
     <div className="flex dark:text-gray-100">
       <main className="flex-1">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Tickets</h1>
-          <button
-            onClick={() => navigate("/add-ticket")}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Adicionar Ticket
-          </button>
+          {(isAdmin || isSuperAdmin) && (
+            <button
+              onClick={() => navigate("/add-ticket")}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <FaPlus />
+              Adicionar Ticket
+            </button>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tickets.map((ticket) => (
-            <div
-              key={ticket.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition"
-            >
-              <div className="flex flex-col mb-3">
-                <h3 className="font-medium text-lg">{ticket.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Nome:</span> {ticket.name}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Espaço:</span> {ticket.space}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Data:</span>{" "}
-                  {ticket.date
-                    ? new Date(ticket.date.seconds * 1000).toLocaleDateString()
-                    : "-"}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Descrição:</span>{" "}
-                  {ticket.description}
-                </p>
-                <p className={`text-sm mt-2 ${getStatusColor(ticket.status)}`}>
-                  <span className="font-semibold">Status:</span>{" "}
-                  {getStatusText(ticket.status)}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Criado em:{" "}
-                  {ticket.createdAt
-                    ? new Date(ticket.createdAt.seconds * 1000).toLocaleString(
-                        "pt-PT",
-                      )
-                    : "-"}
-                </p>
-                {ticket.updatedAt && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Atualizado em:{" "}
-                    {new Date(ticket.updatedAt.seconds * 1000).toLocaleString(
-                      "pt-PT",
-                    )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tickets.map((ticket) => {
+            const status = statusInfo[ticket.status] || statusInfo.pending;
+            return (
+              <div
+                key={ticket.id}
+                className="p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col"
+              >
+                <h3 className="font-bold text-xl mb-2 text-gray-800 dark:text-gray-100">
+                  {ticket.title}
+                </h3>
+                <div className="space-y-3 text-gray-600 dark:text-gray-400">
+                  <p className="flex items-center">
+                    <FaUser className="mr-2 text-gray-400" /> {ticket.name}
                   </p>
-                )}
-              </div>
+                  <p className="flex items-center">
+                    <FaMapMarkerAlt className="mr-2 text-gray-400" />{" "}
+                    {ticket.space}
+                  </p>
+                  <p className="flex items-center">
+                    <FaCalendarAlt className="mr-2 text-gray-400" />
+                    {ticket.date
+                      ? new Date(ticket.date.seconds * 1000).toLocaleDateString(
+                          "pt-PT",
+                        )
+                      : "-"}
+                  </p>
+                  <p className="flex items-start">
+                    <FaInfoCircle className="mr-2 mt-1 text-gray-400" />
+                    <span className="flex-1">{ticket.description}</span>
+                  </p>
+                  <div
+                    className={`flex items-center font-bold p-2 rounded-lg ${status.color}`}
+                  >
+                    {status.icon}
+                    {status.text}
+                  </div>
+                </div>
 
-              <div className="mt-3 flex gap-2">
-                <button
-                  onClick={() => navigate(`/tickets/edit/${ticket.id}`)}
-                  className="text-sm px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(ticket.id)}
-                  className="text-sm px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Apagar
-                </button>
+                <div className="mt-auto pt-4 flex gap-2">
+                  {(isAdmin || isSuperAdmin) && (
+                    <button
+                      onClick={() => navigate(`/tickets/edit/${ticket.id}`)}
+                      className="flex items-center gap-1 text-sm px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                    >
+                      <FaEdit />
+                      Editar
+                    </button>
+                  )}
+                  {isSuperAdmin && (
+                    <button
+                      onClick={() => handleDelete(ticket.id)}
+                      className="flex items-center gap-1 text-sm px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      <FaTrash />
+                      Apagar
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
     </div>

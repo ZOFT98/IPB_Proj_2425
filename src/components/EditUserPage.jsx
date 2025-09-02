@@ -4,6 +4,9 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase";
 import defaultUserImage from "../uploads/default-profile.jpg";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { FaKey } from "react-icons/fa";
+import { auth } from "../firebase";
 
 const EditUserPage = () => {
   const { id } = useParams();
@@ -16,7 +19,9 @@ const EditUserPage = () => {
     birthdate: "",
     gender: "",
     picture: "",
+    role: "admin",
   });
+  const [originalRole, setOriginalRole] = useState("");
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
 
@@ -27,7 +32,8 @@ const EditUserPage = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setForm(data);
+          setForm((prev) => ({ ...prev, ...data }));
+          setOriginalRole(data.role);
           if (data.picture && data.picture.startsWith("https://")) {
             setPreview(data.picture);
           } else {
@@ -47,10 +53,12 @@ const EditUserPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
-    if (!form.email.trim()) newErrors.email = "Email é obrigatório";
-    if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
-    if (!form.contact.trim()) newErrors.contact = "Contato é obrigatório";
+    if (!(form.name || "").trim()) newErrors.name = "Nome é obrigatório";
+    if (!(form.email || "").trim()) newErrors.email = "Email é obrigatório";
+    if (!(form.address || "").trim())
+      newErrors.address = "Morada é obrigatória";
+    if (!(form.contact || "").trim())
+      newErrors.contact = "Contato é obrigatório";
     if (!form.birthdate)
       newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
@@ -83,6 +91,21 @@ const EditUserPage = () => {
 
     setForm({ ...form, picture: file });
     setPreview(URL.createObjectURL(file));
+  };
+
+  const handlePasswordReset = async () => {
+    if (!form.email) {
+      alert("Email do utilizador não encontrado.");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, form.email);
+      alert(
+        `Email de redefinição de palavra-passe enviado para ${form.email}.`,
+      );
+    } catch (error) {
+      alert("Erro ao enviar email de redefinição: " + error.message);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -120,9 +143,17 @@ const EditUserPage = () => {
         birthdate: form.birthdate,
         gender: form.gender,
         picture: pictureUrl,
+        role: form.role,
       };
 
       await updateDoc(doc(db, "users", id), updatedData);
+
+      if (form.role !== originalRole) {
+        alert(
+          "Role atualizado com sucesso! O utilizador precisa de fazer logout e login novamente para que as novas permissões sejam aplicadas.",
+        );
+      }
+
       navigate("/users");
     } catch (error) {
       alert("Erro ao atualizar usuário.", error);
@@ -168,18 +199,25 @@ const EditUserPage = () => {
 
           {/* Inputs */}
           {[
-            { name: "name", type: "text", placeholder: "Nome *" },
-            { name: "email", type: "email", placeholder: "Email *" },
-            { name: "address", type: "text", placeholder: "Morada *" },
-            { name: "contact", type: "text", placeholder: "Contacto *" },
-          ].map(({ name, type, placeholder }) => (
+            { name: "name", type: "text", label: "Nome" },
+            { name: "email", type: "email", label: "Email" },
+            { name: "address", type: "text", label: "Morada" },
+            { name: "contact", type: "text", label: "Contacto" },
+          ].map(({ name, type, label }) => (
             <div className="mb-3" key={name}>
+              <label
+                htmlFor={name}
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                {label} *
+              </label>
               <input
+                id={name}
                 name={name}
                 type={type}
                 value={form[name]}
                 onChange={handleChange}
-                placeholder={placeholder}
+                placeholder={label}
                 className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
                   errors[name] ? "border-red-500" : ""
                 }`}
@@ -192,7 +230,14 @@ const EditUserPage = () => {
 
           {/* Birthdate */}
           <div className="mb-3">
+            <label
+              htmlFor="birthdate"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Data de Nascimento *
+            </label>
             <input
+              id="birthdate"
               name="birthdate"
               type="date"
               value={form.birthdate}
@@ -208,7 +253,14 @@ const EditUserPage = () => {
 
           {/* Gender */}
           <div className="mb-4">
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Gênero *
+            </label>
             <select
+              id="gender"
               name="gender"
               value={form.gender}
               onChange={handleChange}
@@ -216,13 +268,53 @@ const EditUserPage = () => {
                 errors.gender ? "border-red-500" : ""
               }`}
             >
-              <option value="">Gênero *</option>
+              <option value="">Selecione o Gênero</option>
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
             {errors.gender && (
               <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
             )}
+          </div>
+
+          {/* Role */}
+          <div className="mb-4">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Role *
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                errors.role ? "border-red-500" : ""
+              }`}
+            >
+              <option value="admin">Administrador</option>
+              <option value="superadmin">Super Administrador</option>
+            </select>
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+            )}
+          </div>
+
+          {/* Password Reset Section */}
+          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Gestão de Palavra-passe
+            </label>
+            <button
+              type="button"
+              onClick={handlePasswordReset}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              <FaKey />
+              Enviar Email de Redefinição
+            </button>
           </div>
 
           {/* Buttons */}

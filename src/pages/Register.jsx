@@ -4,21 +4,38 @@ import { register } from "../firebase/authService";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    address: "",
+    contact: "",
+    birthdate: "",
+    gender: "",
+  });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    if (password !== confirmPassword) {
+    if (form.password !== form.confirmPassword) {
       alert("As passwords não coincidem!");
       return;
     }
 
+    if (!agreedToTerms) {
+      alert("Deve aceitar os Termos de Serviço e a Política de Privacidade.");
+      return;
+    }
+
     try {
-      await register(email, password);
+      await register(form);
       alert("Conta criada com sucesso!");
       navigate("/login");
     } catch (error) {
@@ -49,9 +66,10 @@ export default function RegisterPage() {
               </label>
               <input
                 type="text"
+                name="name"
                 placeholder="Seu nome"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={form.name}
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
@@ -64,12 +82,70 @@ export default function RegisterPage() {
               </label>
               <input
                 type="email"
+                name="email"
                 placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={form.email}
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
               />
+            </div>
+
+            {/* New Fields */}
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1 text-left">
+                Morada
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1 text-left">
+                Contacto
+              </label>
+              <input
+                type="text"
+                name="contact"
+                value={form.contact}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1 text-left">
+                Data de Nascimento
+              </label>
+              <input
+                type="date"
+                name="birthdate"
+                value={form.birthdate}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 text-sm font-medium mb-1 text-left">
+                Gênero
+              </label>
+              <select
+                name="gender"
+                value={form.gender}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                required
+              >
+                <option value="">Selecione</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+              </select>
             </div>
 
             {/* Password input */}
@@ -79,9 +155,10 @@ export default function RegisterPage() {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={form.password}
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
                 minLength="6"
@@ -95,13 +172,48 @@ export default function RegisterPage() {
               </label>
               <input
                 type="password"
+                name="confirmPassword"
                 placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={form.confirmPassword}
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 required
                 minLength="6"
               />
+            </div>
+
+            <div className="flex items-start">
+              <div className="flex items-center h-5">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-green-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-green-600 dark:ring-offset-gray-800"
+                  required
+                />
+              </div>
+              <div className="ml-3 text-sm text-left">
+                <label
+                  htmlFor="terms"
+                  className="font-light text-gray-500 dark:text-gray-300"
+                >
+                  Eu concordo com os{" "}
+                  <a
+                    className="font-medium text-green-600 hover:underline dark:text-green-500"
+                    href="#"
+                  >
+                    Termos de Serviço
+                  </a>{" "}
+                  e a{" "}
+                  <a
+                    className="font-medium text-green-600 hover:underline dark:text-green-500"
+                    href="#"
+                  >
+                    Política de Privacidade
+                  </a>
+                </label>
+              </div>
             </div>
 
             {/* Register button */}

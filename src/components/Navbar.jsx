@@ -14,7 +14,7 @@ import { useAuth } from "../contexts/AuthContext";
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { currentUser, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -24,6 +24,9 @@ const Navbar = () => {
       alert("Erro ao fazer logout.", error);
     }
   };
+
+  const isAdmin = currentUser && currentUser.role === "admin";
+  const isSuperAdmin = currentUser && currentUser.role === "superadmin";
 
   if (
     location.pathname === "/" ||
@@ -56,46 +59,49 @@ const Navbar = () => {
             <h3 className="font-semibold">Inicio</h3>
           </div>
         </Link>
+        {(isAdmin || isSuperAdmin) && (
+          <>
+            <Link
+              to="/spaces"
+              className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
+            >
+              <FaBuilding className="mr-3" />
+              <div>
+                <h3 className="font-semibold">Instalações</h3>
+              </div>
+            </Link>
 
-        <Link
-          to="/spaces"
-          className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
-        >
-          <FaBuilding className="mr-3" />
-          <div>
-            <h3 className="font-semibold">Instalações</h3>
-          </div>
-        </Link>
+            <Link
+              to="/bookings"
+              className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
+            >
+              <FaCalendarAlt className="mr-3" />
+              <div>
+                <h3 className="font-semibold">Reservas</h3>
+              </div>
+            </Link>
 
-        <Link
-          to="/users"
-          className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
-        >
-          <FaUsers className="mr-3" />
-          <div>
-            <h3 className="font-semibold">Utilizadores</h3>
-          </div>
-        </Link>
+            <Link
+              to="/users"
+              className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
+            >
+              <FaUsers className="mr-3" />
+              <div>
+                <h3 className="font-semibold">Utilizadores</h3>
+              </div>
+            </Link>
 
-        <Link
-          to="/bookings"
-          className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
-        >
-          <FaCalendarAlt className="mr-3" />
-          <div>
-            <h3 className="font-semibold">Reservas</h3>
-          </div>
-        </Link>
-
-        <Link
-          to="/tickets"
-          className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
-        >
-          <FaTicketAlt className="mr-3" />
-          <div>
-            <h3 className="font-semibold">Tickets</h3>
-          </div>
-        </Link>
+            <Link
+              to="/tickets"
+              className="flex items-center p-3 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-600 hover:text-blue-600 dark:hover:text-blue-300 transition"
+            >
+              <FaTicketAlt className="mr-3" />
+              <div>
+                <h3 className="font-semibold">Tickets</h3>
+              </div>
+            </Link>
+          </>
+        )}
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">

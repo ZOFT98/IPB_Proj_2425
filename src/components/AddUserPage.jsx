@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUser } from "../firebase/authService";
-import { db, storage } from "../firebase";
-import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { register } from "../firebase/authService";
 
 const AddUserPage = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     address: "",
     contact: "",
     birthdate: "",
     gender: "",
+    role: "admin",
     picture: null,
   });
 
@@ -30,6 +30,15 @@ const AddUserPage = () => {
     if (!form.birthdate)
       newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
+    if (!form.role) newErrors.role = "O role é obrigatório";
+    if (!form.password) {
+      newErrors.password = "Palavra-passe é obrigatória";
+    } else if (form.password.length < 6) {
+      newErrors.password = "Palavra-passe deve ter no mínimo 6 caracteres";
+    }
+    if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "As palavras-passe não coincidem";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,38 +72,7 @@ const AddUserPage = () => {
     setIsSubmitting(true);
 
     try {
-      const password = "123456";
-      const firebaseUser = await registerUser(form.email, password);
-
-      let imageUrl = "src/uploads/profile1.jpg";
-      if (form.picture instanceof File) {
-        const imageRef = ref(
-          storage,
-          `users/${Date.now()}-${form.picture.name}`,
-        );
-        const uploadTask = uploadBytesResumable(imageRef, form.picture);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on("state_changed", null, reject, async () => {
-            imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve();
-          });
-        });
-      }
-
-      const userData = {
-        uid: firebaseUser.uid,
-        name: form.name,
-        email: form.email,
-        address: form.address,
-        contact: form.contact,
-        birthdate: form.birthdate,
-        gender: form.gender,
-        picture: imageUrl,
-        createdAt: new Date().toISOString(),
-      };
-
-      await addDoc(collection(db, "users"), userData);
+      await register(form);
       navigate("/users");
     } catch (error) {
       alert(`Erro: ${error.message}`);
@@ -144,13 +122,20 @@ const AddUserPage = () => {
 
           {fields.map((field) => (
             <div className="mb-3" key={field.name}>
+              <label
+                htmlFor={field.name}
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                {field.label} *
+              </label>
               <input
+                id={field.name}
                 type={field.type}
                 name={field.name}
                 value={form[field.name]}
                 onChange={handleChange}
                 disabled={isSubmitting}
-                placeholder={`${field.label} *`}
+                placeholder={field.label}
                 className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
               />
               {errors[field.name] && (
@@ -161,8 +146,63 @@ const AddUserPage = () => {
             </div>
           ))}
 
-          <div className="mb-3">
+          <div className="mb-4">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Palavra-passe *
+            </label>
             <input
+              id="password"
+              name="password"
+              type="password"
+              value={form.password}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                errors.password ? "border-red-500" : ""
+              }`}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Confirmar Palavra-passe *
+            </label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                errors.confirmPassword ? "border-red-500" : ""
+              }`}
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
+
+          <div className="mb-3">
+            <label
+              htmlFor="birthdate"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Data de Nascimento *
+            </label>
+            <input
+              id="birthdate"
               name="birthdate"
               type="date"
               value={form.birthdate}
@@ -176,19 +216,49 @@ const AddUserPage = () => {
           </div>
 
           <div className="mb-4">
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Gênero *
+            </label>
             <select
+              id="gender"
               name="gender"
               value={form.gender}
               onChange={handleChange}
               disabled={isSubmitting}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.gender ? "border-red-500" : ""}`}
             >
-              <option value="">Gênero *</option>
+              <option value="">Selecione o Gênero</option>
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
             {errors.gender && (
               <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+            )}
+          </div>
+
+          <div className="mb-4">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Role *
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.role ? "border-red-500" : ""}`}
+            >
+              <option value="admin">Administrador</option>
+              <option value="superadmin">Super Administrador</option>
+            </select>
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
             )}
           </div>
 

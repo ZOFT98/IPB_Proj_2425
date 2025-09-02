@@ -1,22 +1,58 @@
 import { Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
-import Home from "../pages/HomePage";
-import Instalacoes from "../pages/Instalacoes";
-import Reservas from "../pages/Bookings";
-import Users from "../pages/Users/users";
+import RegisterPage from "../pages/Register";
+import HomePage from "../pages/HomePage";
+import Bookings from "../pages/Bookings";
+import Users from "../pages/Users";
 import Tickets from "../pages/Tickets";
 import Spaces from "../pages/Spaces";
+import ProtectedRoute from "./ProtectedRoute";
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/instalacoes" element={<Instalacoes />} />
-      <Route path="/bookings" element={<Reservas />} />
-      <Route path="/users" element={<Users />} />
-      <Route path="/tickets" element={<Tickets />} />
-      <Route path="/spaces" element={<Spaces />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bookings"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+            <Bookings />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+            <Users />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/tickets"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+            <Tickets />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/spaces"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+            <Spaces />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 };

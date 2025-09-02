@@ -5,9 +5,18 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { auth } from "../firebase";
+import { createUserDocument } from "./firestoreService";
 
-export const register = (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password);
+export const register = async (userData) => {
+  const { email, password, role = "admin", ...profileData } = userData;
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
+  const { user } = userCredential;
+  await createUserDocument(user.uid, { ...profileData, email, role });
+  return userCredential;
 };
 
 export const login = (email, password) => {
@@ -20,10 +29,4 @@ export const logout = () => {
 
 export const resetPassword = (email) => {
   return sendPasswordResetEmail(auth, email);
-};
-
-export const registerUser = (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password).then(
-    (res) => res.user,
-  );
 };

@@ -2,10 +2,44 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCalendarAlt,
+  FaClock,
+  FaMapMarkerAlt,
+  FaInfoCircle,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHourglassHalf,
+} from "react-icons/fa";
+
+const statusInfo = {
+  confirmed: {
+    text: "Confirmado",
+    icon: <FaCheckCircle className="mr-2" />,
+    color: "text-green-500",
+  },
+  cancelled: {
+    text: "Cancelado",
+    icon: <FaTimesCircle className="mr-2" />,
+    color: "text-red-500",
+  },
+  pending: {
+    text: "Pendente",
+    icon: <FaHourglassHalf className="mr-2" />,
+    color: "text-yellow-500",
+  },
+};
 
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const isAdmin = currentUser && currentUser.role === "admin";
+  const isSuperAdmin = currentUser && currentUser.role === "superadmin";
 
   useEffect(() => {
     fetchBookings();
@@ -38,81 +72,86 @@ const Bookings = () => {
       <main className="flex-1">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Reservas</h1>
-          <button
-            onClick={() => navigate("/add-bookings")}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
-          >
-            Adicionar Reserva
-          </button>
+          {(isAdmin || isSuperAdmin) && (
+            <button
+              onClick={() => navigate("/add-bookings")}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <FaPlus />
+              Adicionar Reserva
+            </button>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {bookings.map((booking) => (
-            <div
-              key={booking.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition"
-            >
-              <div className="flex flex-col items-center mb-3">
-                <h3 className="font-medium text-lg">{booking.title}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {new Date(booking.date).toLocaleDateString("pt-PT")} •{" "}
-                  {booking.startTime} - {booking.endTime}
-                </p>
-              </div>
-
-              <p className="text-gray-500 dark:text-gray-400">
-                <span className="font-medium">Espaço Desportivo:</span>{" "}
-                {booking.space}
-              </p>
-
-              <div className="space-y-2">
-                <p className="text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">Descrição:</span>{" "}
-                  {booking.description}
-                </p>
-                <p
-                  className={`text-sm font-medium ${
-                    booking.status === "confirmed"
-                      ? "text-green-500"
-                      : booking.status === "cancelled"
-                        ? "text-red-500"
-                        : "text-yellow-500"
-                  }`}
-                >
-                  Status: {booking.status}
-                </p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  Criado em:{" "}
-                  {booking.createdAt
-                    ? new Date(booking.createdAt.seconds * 1000).toLocaleString(
-                        "pt-PT",
-                      )
-                    : "-"}
-                </p>
-                {booking.updatedAt && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Atualizado em:{" "}
-                    {new Date(booking.updatedAt).toLocaleString("pt-PT")}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bookings.map((booking) => {
+            const status = statusInfo[booking.status] || {
+              text: booking.status,
+              icon: null,
+              color: "text-gray-500",
+            };
+            return (
+              <div
+                key={booking.id}
+                className="p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col"
+              >
+                <h3 className="font-bold text-xl mb-2 text-gray-800 dark:text-gray-100">
+                  {booking.title}
+                </h3>
+                <div className="space-y-3 text-gray-600 dark:text-gray-400">
+                  <p className="flex items-center">
+                    <FaMapMarkerAlt className="mr-2 text-gray-400" />
+                    <span className="font-semibold mr-1">Espaço:</span>
+                    {booking.space}
                   </p>
-                )}
-              </div>
+                  <p className="flex items-center">
+                    <FaCalendarAlt className="mr-2 text-gray-400" />
+                    <span className="font-semibold mr-1">Data:</span>
+                    {new Date(booking.date).toLocaleDateString("pt-PT")}
+                  </p>
+                  <p className="flex items-center">
+                    <FaClock className="mr-2 text-gray-400" />
+                    <span className="font-semibold mr-1">Horário:</span>
+                    {booking.startTime} - {booking.endTime}
+                  </p>
+                  <p className="flex items-start">
+                    <FaInfoCircle className="mr-2 mt-1 text-gray-400" />
+                    <span className="font-semibold mr-1">Descrição:</span>
+                    <span className="flex-1">{booking.description}</span>
+                  </p>
+                  <div
+                    className={`flex items-center font-bold p-2 rounded-lg ${status.color}`}
+                  >
+                    {status.icon}
+                    {status.text}
+                  </div>
+                </div>
 
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={() => navigate(`/bookings/edit/${booking.id}`)}
-                  className="text-sm px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => handleDelete(booking.id)}
-                  className="text-sm px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-                >
-                  Apagar
-                </button>
+                <div className="mt-auto pt-4">
+                  <div className="flex gap-2">
+                    {(isAdmin || isSuperAdmin) && (
+                      <button
+                        onClick={() => navigate(`/bookings/edit/${booking.id}`)}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                      >
+                        <FaEdit />
+                        Editar
+                      </button>
+                    )}
+                    {isSuperAdmin && (
+                      <button
+                        onClick={() => handleDelete(booking.id)}
+                        className="flex items-center gap-1 text-sm px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      >
+                        <FaTrash />
+                        Apagar
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </main>
     </div>
