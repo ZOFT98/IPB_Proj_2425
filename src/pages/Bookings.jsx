@@ -42,7 +42,7 @@ const Bookings = () => {
             onClick={() => navigate("/add-bookings")}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
           >
-            Adicionar reserva
+            Adicionar Reserva
           </button>
         </div>
 
@@ -81,12 +81,14 @@ const Bookings = () => {
                 >
                   Status: {booking.status}
                 </p>
-                {booking.createdAt && (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">
-                    Criado em:{" "}
-                    {new Date(booking.createdAt).toLocaleString("pt-PT")}
-                  </p>
-                )}
+                <p className="text-gray-500 dark:text-gray-400 text-sm">
+                  Criado em:{" "}
+                  {booking.createdAt
+                    ? new Date(booking.createdAt.seconds * 1000).toLocaleString(
+                        "pt-PT",
+                      )
+                    : "-"}
+                </p>
                 {booking.updatedAt && (
                   <p className="text-gray-500 dark:text-gray-400 text-sm">
                     Atualizado em:{" "}

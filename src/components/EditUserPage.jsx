@@ -137,7 +137,7 @@ const EditUserPage = () => {
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
         >
           <h1 className="text-2xl font-bold mb-6 text-center">
-            Editar Usuário
+            Editar Utilizador
           </h1>
 
           {/* Avatar */}

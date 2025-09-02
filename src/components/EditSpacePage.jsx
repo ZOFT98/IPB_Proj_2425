@@ -156,7 +156,7 @@ const EditSpacePage = () => {
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
         >
           <h1 className="text-2xl font-bold mb-6 text-center">
-            Editar Espaço Esportivo
+            Editar Instalação Desportiva
           </h1>
 
           <div className="mb-4 flex flex-col items-center">

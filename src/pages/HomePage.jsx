@@ -16,6 +16,17 @@ const HomePage = () => {
   const [displayDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  const bookingStatusEmojis = {
+    confirmed: "✅",
+    pending: "⏳",
+  };
+
+  const ticketStatusEmojis = {
+    completed: "✅",
+    pending: "⏳",
+    in_progress: "🔄",
+  };
+
   const displayMonth = displayDate.getMonth();
   const displayYear = displayDate.getFullYear();
   const monthName = displayDate.toLocaleString("pt-PT", { month: "long" });
@@ -102,7 +113,9 @@ const HomePage = () => {
       );
       const bookingsSnapshot = await getDocs(bookingsQuery);
       setBookings(
-        bookingsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+        bookingsSnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((booking) => booking.status !== "cancelled"),
       );
 
       const startOfDay = Timestamp.fromDate(dayToFetch);
@@ -116,7 +129,9 @@ const HomePage = () => {
       );
       const ticketsSnapshot = await getDocs(ticketsQuery);
       setTickets(
-        ticketsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+        ticketsSnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter((ticket) => ticket.status !== "cancelled"),
       );
 
       setLoading(false);
@@ -189,6 +204,7 @@ const HomePage = () => {
                     <ul className="list-disc list-inside space-y-1">
                       {bookings.map((booking) => (
                         <li key={booking.id}>
+                          {bookingStatusEmojis[booking.status]}{" "}
                           {booking.title} às {booking.startTime}
                         </li>
                       ))}
@@ -201,7 +217,8 @@ const HomePage = () => {
                     <ul className="list-disc list-inside space-y-1">
                       {tickets.map((ticket) => (
                         <li key={ticket.id}>
-                          {ticket.title} - {ticket.name}
+                          {ticketStatusEmojis[ticket.status]} {ticket.title} -{" "}
+                          {ticket.name}
                         </li>
                       ))}
                     </ul>

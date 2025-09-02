@@ -138,7 +138,7 @@ const AddSpacePage = () => {
           className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
         >
           <h1 className="text-2xl font-bold mb-6 text-center">
-            Adicionar Espaço Esportivo
+            Adicionar Instalação Desportiva
           </h1>
 
           <div className="mb-4 flex flex-col items-center">
