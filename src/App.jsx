@@ -1,23 +1,27 @@
 import { Routes, Route, useLocation } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
 import {
   HomePage,
   Users,
   Tickets,
   RegisterPage,
   PasswordRecoveryPage,
+  ProfilePage,
+  LoginPage,
+  Spaces,
+  Bookings,
 } from "./pages";
-import { Navbar } from "./components";
-import Spaces from "./pages/Spaces";
-import Bookings from "./pages/Bookings";
-import AddUserPage from "./components/AddUserPage";
-import EditUserPage from "./components/EditUserPage";
-import AddBookingPage from "./components/AddBookingPage";
-import EditBookingPage from "./components/EditBookingPage";
-import AddSpacePage from "./components/AddSpacePage";
-import EditSpacePage from "./components/EditSpacePage";
-import AddTicketPage from "./components/AddTicketPage";
-import EditTicketPage from "./components/EditTicketPage";
+import {
+  Navbar,
+  AddUserPage,
+  EditUserPage,
+  AddBookingPage,
+  EditBookingPage,
+  AddSpacePage,
+  EditSpacePage,
+  AddTicketPage,
+  EditTicketPage,
+  EditProfilePage,
+} from "./components";
 import ProtectedRoute from "./router/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -154,6 +158,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <EditTicketPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditProfilePage />
                   </ProtectedRoute>
                 }
               />

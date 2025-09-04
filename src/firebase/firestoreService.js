@@ -1,4 +1,4 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 // Add user data to Firestore under `users/{uid}`
@@ -20,5 +20,13 @@ export const getUserDocument = async (uid) => {
     return null;
   } catch (error) {
     throw new Error("Erro ao buscar no Firestore: " + error.message);
+  }
+};
+
+export const updateUser = async (uid, userData) => {
+  try {
+    await updateDoc(doc(db, "users", uid), userData);
+  } catch (error) {
+    throw new Error("Erro ao atualizar no Firestore: " + error.message);
   }
 };
