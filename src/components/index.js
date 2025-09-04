@@ -1,1 +1,10 @@
 export { default as Navbar } from "./Navbar";
+export { default as EditProfilePage } from "./EditProfilePage";
+export { default as AddUserPage } from "./AddUserPage";
+export { default as EditUserPage } from "./EditUserPage";
+export { default as AddBookingPage } from "./AddBookingPage";
+export { default as EditBookingPage } from "./EditBookingPage";
+export { default as AddSpacePage } from "./AddSpacePage";
+export { default as EditSpacePage } from "./EditSpacePage";
+export { default as AddTicketPage } from "./AddTicketPage";
+export { default as EditTicketPage } from "./EditTicketPage";

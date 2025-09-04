@@ -25,8 +25,16 @@ const AuthProvider = ({ children }) => {
 
   const logout = () => signOut(auth);
 
+  const refreshCurrentUser = async () => {
+    const user = auth.currentUser;
+    if (user) {
+      const userProfile = await getUserDocument(user.uid);
+      setCurrentUser(userProfile);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ currentUser, logout }}>
+    <AuthContext.Provider value={{ currentUser, logout, refreshCurrentUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );

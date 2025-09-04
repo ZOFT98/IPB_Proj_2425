@@ -107,6 +107,13 @@ const Navbar = () => {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <Link to="/profile">
+          <img
+            src={currentUser?.photoURL || "/src/uploads/default-profile.jpg"}
+            alt="Foto de Perfil"
+            className="w-8 h-8 rounded-full"
+          />
+        </Link>
         <button
           onClick={handleLogout}
           className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400"

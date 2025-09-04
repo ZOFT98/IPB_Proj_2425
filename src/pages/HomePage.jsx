@@ -15,7 +15,6 @@ import {
   FaBuilding,
   FaUserPlus,
   FaTicketAlt,
-  FaMapMarkerAlt,
   FaEuroSign,
   FaFutbol,
   FaClock,
@@ -332,7 +331,7 @@ const HomePage = () => {
         <main className="flex-1">
           <div className="h-full">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md h-full overflow-hidden">
-              <div className="h-[600px]">
+              <div className="h-full">
                 <LeafletMap
                   center={[41.79685, -6.76843]}
                   zoom={15}
