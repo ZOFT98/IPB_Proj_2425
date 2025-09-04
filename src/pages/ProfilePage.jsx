@@ -1,6 +1,7 @@
 import { useAuth } from "../contexts/AuthContext";
 import { FaUser, FaEnvelope, FaMapMarkerAlt, FaPhone, FaBirthdayCake, FaVenusMars, FaUserTag, FaEdit } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import defaultProfileImage from "../uploads/default-profile.jpg";
 
 const ProfilePage = () => {
   const { currentUser } = useAuth();
@@ -33,7 +34,7 @@ const ProfilePage = () => {
           <div className="md:flex-shrink-0 p-8 flex flex-col items-center justify-center md:border-r md:border-gray-200 dark:md:border-gray-700">
             <img
               className="h-32 w-32 rounded-full object-cover ring-4 ring-green-500"
-              src={currentUser?.photoURL || "/src/uploads/default-profile.jpg"}
+              src={currentUser?.photoURL || defaultProfileImage}
               alt="Foto de Perfil"
             />
             <h2 className="mt-6 text-2xl font-bold text-gray-900 dark:text-white text-center">

@@ -51,7 +51,7 @@ export default function RegisterPage() {
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat p-4"
       style={{
-        backgroundImage: "url('/uploads/background.jpg')",
+        backgroundImage: "url('/background.jpg')",
       }}
     >
       <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">

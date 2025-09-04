@@ -15,16 +15,19 @@ import {
   FaTableTennis,
   FaClock,
   FaUsers,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
 import { notify } from "../services/notificationService";
 import ConfirmationModal from "../components/ConfirmationModal";
+import defaultSpaceImage from "../uploads/default-space.jpg";
 
 const modalityIcons = {
   Futebol: <FaFutbol className="mr-2 text-gray-400" />,
   Futsal: <FaFutbol className="mr-2 text-gray-400" />,
   Basquetebol: <FaBasketball className="mr-2 text-gray-400" />,
   Tenis: <FaTableTennis className="mr-2 text-gray-400" />,
+  Outros: <FaCalendarAlt className="mr-2 text-gray-400" />,
 };
 
 const getModalityIcon = (modality) => {
@@ -107,7 +110,7 @@ const Spaces = () => {
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col overflow-hidden"
             >
               <img
-                src={space.image || "src/uploads/field1.jpg"}
+                src={space.image || defaultSpaceImage}
                 alt={space.name}
                 className="w-full h-48 object-cover"
               />

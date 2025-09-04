@@ -20,8 +20,10 @@ import {
   FaClock,
   FaUsers,
   FaTableTennis,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
+import defaultSpaceImage from "../uploads/default-space.jpg";
 
 const HomePage = () => {
   const [bookings, setBookings] = useState([]);
@@ -54,6 +56,7 @@ const HomePage = () => {
     Futsal: <FaFutbol className="mr-2" />,
     Basquetebol: <FaBasketball className="mr-2" />,
     Tenis: <FaTableTennis className="mr-2" />,
+    Outros: <FaCalendarAlt className="mr-2" />,
   };
 
   const getModalityIcon = (modality) => {
@@ -242,7 +245,7 @@ const HomePage = () => {
       popupContent: (
         <div style={{ lineHeight: "1.4" }}>
           <img
-            src={space.image || "src/uploads/field1.jpg"}
+            src={space.image || defaultSpaceImage}
             alt={space.name}
             style={{
               width: "150px",

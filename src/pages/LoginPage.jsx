@@ -1,12 +1,13 @@
 import { FaFutbol } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-import { login } from "../firebase/authService";
 import { useState, useEffect } from "react";
 import { notify } from "../services/notificationService";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,7 +49,7 @@ export default function LoginPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center relative bg-cover bg-center"
-      style={{ backgroundImage: "url('/uploads/background.jpg')" }}
+      style={{ backgroundImage: "url('/background.jpg')" }}
     >
       {/* Login Card */}
       <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-md text-center relative z-10">

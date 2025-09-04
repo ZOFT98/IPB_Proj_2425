@@ -5,6 +5,7 @@ import { storage } from "../firebase";
 import { useAuth } from "../contexts/AuthContext";
 import { updateUser } from "../firebase/firestoreService";
 import { notify } from "../services/notificationService";
+import defaultProfileImage from "../uploads/default-profile.jpg";
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const EditProfilePage = () => {
         gender: currentUser.gender || "",
         photoURL: currentUser.photoURL || "",
       });
-      setPreview(currentUser.photoURL || "/src/uploads/default-profile.jpg");
+      setPreview(currentUser.photoURL || defaultProfileImage);
     }
   }, [currentUser]);
 

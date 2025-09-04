@@ -100,7 +100,7 @@ const AddSpacePage = () => {
     try {
       // Cria um novo ID antecipadamente
       const newDocRef = doc(collection(db, "spaces"));
-      let imageUrl = "src/uploads/field1.jpg";
+      let imageUrl = "";
 
       if (form.image instanceof File) {
         const imageRef = ref(
@@ -368,6 +368,7 @@ const AddSpacePage = () => {
                   <option value="Basquetebol">Basquetebol</option>
                   <option value="Tenis">Ténis</option>
                   <option value="Futsal">Futsal</option>
+                  <option value="Outros">Outros Eventos</option>
                 </select>
                 {errors.modality && (
                   <p className="text-red-500 text-sm mt-1">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../firebase";
 import defaultUserImage from "../uploads/default-profile.jpg";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -19,7 +19,7 @@ const EditUserPage = () => {
     contact: "",
     birthdate: "",
     gender: "",
-    picture: "",
+    photoURL: "",
     role: "admin",
   });
   const [originalRole, setOriginalRole] = useState("");
@@ -35,8 +35,8 @@ const EditUserPage = () => {
           const data = docSnap.data();
           setForm((prev) => ({ ...prev, ...data }));
           setOriginalRole(data.role);
-          if (data.picture && data.picture.startsWith("https://")) {
-            setPreview(data.picture);
+          if (data.photoURL && data.photoURL.startsWith("https://")) {
+            setPreview(data.photoURL);
           } else {
             setPreview(defaultUserImage);
           }
@@ -90,7 +90,7 @@ const EditUserPage = () => {
       return;
     }
 
-    setForm({ ...form, picture: file });
+    setForm({ ...form, photoURL: file });
     setPreview(URL.createObjectURL(file));
   };
 
@@ -115,26 +115,15 @@ const EditUserPage = () => {
     if (!validateForm()) return;
 
     try {
-      let pictureUrl = form.picture;
+      let photoURL = form.photoURL;
 
-      if (form.picture instanceof File) {
+      if (form.photoURL instanceof File) {
         const imageRef = ref(
           storage,
-          `users/${Date.now()}-${form.picture.name}`,
+          `users/${id}/${form.photoURL.name}`
         );
-        const uploadTask = uploadBytesResumable(imageRef, form.picture);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            null,
-            (error) => reject(error),
-            async () => {
-              pictureUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            },
-          );
-        });
+        const snapshot = await uploadBytes(imageRef, form.photoURL);
+        photoURL = await getDownloadURL(snapshot.ref);
       }
 
       const updatedData = {
@@ -144,7 +133,7 @@ const EditUserPage = () => {
         contact: form.contact,
         birthdate: form.birthdate,
         gender: form.gender,
-        picture: pictureUrl,
+        photoURL: photoURL,
         role: form.role,
       };
 

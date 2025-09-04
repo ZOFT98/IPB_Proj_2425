@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../firebase/authService";
 import { notify } from "../services/notificationService";
+import defaultProfileImage from "../uploads/default-profile.jpg";
 
 const AddUserPage = () => {
   const [form, setForm] = useState({
@@ -14,7 +15,7 @@ const AddUserPage = () => {
     birthdate: "",
     gender: "",
     role: "admin",
-    picture: null,
+    photoURL: null,
   });
 
   const [preview, setPreview] = useState("");
@@ -63,7 +64,7 @@ const AddUserPage = () => {
       notify("Imagem deve ter menos de 5MB.", "warning");
       return;
     }
-    setForm({ ...form, picture: file });
+    setForm({ ...form, photoURL: file });
     setPreview(URL.createObjectURL(file));
   };
 
@@ -110,7 +111,7 @@ const AddUserPage = () => {
               />
             ) : (
               <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
-                <span className="text-gray-500">Sem imagem</span>
+                <img src={defaultProfileImage} alt="Default" className="w-32 h-32 rounded-full object-cover"/>
               </div>
             )}
             <input

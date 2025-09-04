@@ -15,6 +15,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { notify } from "../services/notificationService";
 import ConfirmationModal from "../components/ConfirmationModal";
+import defaultProfileImage from "../uploads/default-profile.jpg";
 
 const roleInfo = {
   admin: {
@@ -117,7 +118,7 @@ const Users = () => {
             >
               <div className="flex items-center mb-4">
                 <img
-                  src={user.picture || "src/uploads/profile1.jpg"}
+                  src={user.photoURL || defaultProfileImage}
                   alt={user.name}
                   className="w-20 h-20 rounded-full object-cover mr-4"
                 />

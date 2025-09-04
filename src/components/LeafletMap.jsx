@@ -4,10 +4,12 @@ import {
   Marker,
   Popup,
   useMapEvents,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import PropTypes from "prop-types";
+import { useEffect } from "react";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -30,6 +32,19 @@ LocationPicker.propTypes = {
   onClick: PropTypes.func.isRequired,
 };
 
+const ChangeView = ({ center, zoom }) => {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+};
+
+ChangeView.propTypes = {
+  center: PropTypes.arrayOf(PropTypes.number).isRequired,
+  zoom: PropTypes.number.isRequired,
+};
+
 const LeafletMap = ({ center, zoom, markers, onClick, style }) => {
   return (
     <MapContainer
@@ -37,6 +52,7 @@ const LeafletMap = ({ center, zoom, markers, onClick, style }) => {
       zoom={zoom}
       style={style || { height: "100%", width: "100%" }}
     >
+      <ChangeView center={center} zoom={zoom} />
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

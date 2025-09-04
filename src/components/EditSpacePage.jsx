@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db, storage } from "../firebase";
 import { doc, getDoc, updateDoc, Timestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import defaultSpaceImage from "../uploads/field1.jpg";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import defaultSpaceImage from "../uploads/default-space.jpg";
 import LeafletMap from "./LeafletMap";
 import { notify } from "../services/notificationService";
 
@@ -128,23 +128,9 @@ const EditSpacePage = () => {
       let imageUrl = form.image;
 
       if (form.image instanceof File) {
-        const imageRef = ref(
-          storage,
-          `spaces/${Date.now()}-${form.image.name}`,
-        );
-        const uploadTask = uploadBytesResumable(imageRef, form.image);
-
-        await new Promise((resolve, reject) => {
-          uploadTask.on(
-            "state_changed",
-            null,
-            (error) => reject(error),
-            async () => {
-              imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            },
-          );
-        });
+        const imageRef = ref(storage, `spaces/${id}/${form.image.name}`);
+        const snapshot = await uploadBytes(imageRef, form.image);
+        imageUrl = await getDownloadURL(snapshot.ref);
       }
 
       const spaceRef = doc(db, "spaces", id);
@@ -378,6 +364,7 @@ const EditSpacePage = () => {
                   <option value="Basquetebol">Basquetebol</option>
                   <option value="Tenis">Ténis</option>
                   <option value="Futsal">Futsal</option>
+                  <option value="Outros">Outros Eventos</option>
                 </select>
                 {errors.modality && (
                   <p className="text-red-500 text-sm mt-1">
