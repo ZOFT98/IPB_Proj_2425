@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
 import { useAuth } from "../contexts/AuthContext";
+import { notify } from "../services/notificationService";
 
 const Navbar = () => {
   const location = useLocation();
@@ -19,9 +20,10 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await logout();
+      notify("Sessão terminada com sucesso!", "success");
       navigate("/login");
     } catch (error) {
-      alert("Erro ao fazer logout.", error);
+      notify("Erro ao terminar a sessão. Tente novamente.", "error");
     }
   };
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
@@ -13,6 +13,8 @@ import {
   FaVenusMars,
 } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
+import { notify } from "../services/notificationService";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const roleInfo = {
   admin: {
@@ -27,16 +29,14 @@ const roleInfo = {
 
 const Users = () => {
   const [users, setUsers] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
   const isSuperAdmin = currentUser && currentUser.role === "superadmin";
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const snapshot = await getDocs(collection(db, "users"));
       let data = snapshot.docs.map((doc) => ({
@@ -52,20 +52,36 @@ const Users = () => {
 
       setUsers(data);
     } catch (error) {
-      alert("Erro ao carregar utilizadores.", error);
+      console.error(error);
+      notify("Erro ao carregar utilizadores.", "error");
     }
-  };
+  }, [currentUser.uid]);
 
-  const handleDelete = async (id) => {
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleDelete = (id) => {
     if (id === currentUser.uid) {
-      alert("Não se pode apagar a si próprio.");
+      notify("Não se pode apagar a si próprio.", "warning");
       return;
     }
+    setUserToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
     try {
-      await deleteDoc(doc(db, "users", id));
-      setUsers(users.filter((u) => u.id !== id));
+      await deleteDoc(doc(db, "users", userToDelete));
+      setUsers(users.filter((u) => u.id !== userToDelete));
+      notify("Utilizador apagado com sucesso!", "success");
     } catch (error) {
-      alert("Erro ao apagar. Tente novamente.", error);
+      console.error(error);
+      notify("Erro ao apagar. Tente novamente.", "error");
+    } finally {
+      setIsModalOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -84,6 +100,14 @@ const Users = () => {
             </button>
           )}
         </div>
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirmar Eliminação"
+          message="Tem a certeza de que pretende eliminar este utilizador?"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {users.map((user) => (

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../firebase/authService";
+import { notify } from "../services/notificationService";
 
 const AddUserPage = () => {
   const [form, setForm] = useState({
@@ -55,11 +56,11 @@ const AddUserPage = () => {
     const file = e.target.files[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      alert("Selecione uma imagem válida.");
+      notify("Selecione uma imagem válida.", "warning");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("Imagem deve ter menos de 5MB.");
+      notify("Imagem deve ter menos de 5MB.", "warning");
       return;
     }
     setForm({ ...form, picture: file });
@@ -73,9 +74,10 @@ const AddUserPage = () => {
 
     try {
       await register(form);
+      notify("Utilizador adicionado com sucesso!", "success");
       navigate("/users");
     } catch (error) {
-      alert(`Erro: ${error.message}`);
+      notify(`Erro: ${error.message}`, "error");
     } finally {
       setIsSubmitting(false);
     }

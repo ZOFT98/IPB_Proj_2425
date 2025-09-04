@@ -17,6 +17,8 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import { FaBasketball } from "react-icons/fa6";
+import { notify } from "../services/notificationService";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const modalityIcons = {
   Futebol: <FaFutbol className="mr-2 text-gray-400" />,
@@ -31,6 +33,8 @@ const getModalityIcon = (modality) => {
 
 const Spaces = () => {
   const [spaces, setSpaces] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [spaceToDelete, setSpaceToDelete] = useState(null);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
@@ -49,16 +53,26 @@ const Spaces = () => {
       }));
       setSpaces(list);
     } catch (error) {
-      alert("Erro ao carregar instalações.", error);
+      notify("Erro ao carregar instalações.", "error");
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setSpaceToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!spaceToDelete) return;
     try {
-      await deleteDoc(doc(db, "spaces", id));
+      await deleteDoc(doc(db, "spaces", spaceToDelete));
       fetchSpaces();
+      notify("Instalação Desportiva removida com sucesso!", "success");
     } catch (error) {
-      alert("Erro ao apagar. Tente novamente.", error);
+      notify("Erro ao apagar. Tente novamente.", "error");
+    } finally {
+      setIsModalOpen(false);
+      setSpaceToDelete(null);
     }
   };
 
@@ -77,6 +91,14 @@ const Spaces = () => {
             </button>
           )}
         </div>
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirmar Eliminação"
+          message="Tem a certeza de que pretende eliminar esta instalação desportiva?"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {spaces.map((space) => (
@@ -101,7 +123,7 @@ const Spaces = () => {
                   </p>
                   <p className="flex items-center">
                     <FaMapMarkerAlt className="mr-2 text-gray-400" />
-                    <span className="font-semibold mr-1">Localização:</span>
+                    <span className="font-semibold mr-1">Localidade:</span>
                     {space.locality}
                   </p>
                   <p className="flex items-center">

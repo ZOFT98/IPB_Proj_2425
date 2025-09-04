@@ -4,13 +4,13 @@ import {
   signOut,
   sendPasswordResetEmail,
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, adminAuth } from "../firebase";
 import { createUserDocument } from "./firestoreService";
 
 export const register = async (userData) => {
   const { email, password, role = "admin", ...profileData } = userData;
   const userCredential = await createUserWithEmailAndPassword(
-    auth,
+    adminAuth,
     email,
     password,
   );

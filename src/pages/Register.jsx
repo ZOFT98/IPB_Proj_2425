@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register } from "../firebase/authService";
+import { notify } from "../services/notificationService";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -25,21 +26,24 @@ export default function RegisterPage() {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
-      alert("As passwords não coincidem!");
+      notify("As passwords não coincidem!", "error");
       return;
     }
 
     if (!agreedToTerms) {
-      alert("Deve aceitar os Termos de Serviço e a Política de Privacidade.");
+      notify(
+        "Deve aceitar os Termos de Serviço e a Política de Privacidade.",
+        "warning",
+      );
       return;
     }
 
     try {
       await register(form);
-      alert("Conta criada com sucesso!");
+      notify("Conta criada com sucesso!", "success");
       navigate("/login");
     } catch (error) {
-      alert("Erro ao criar conta: " + error.message);
+      notify("Erro ao criar conta: " + error.message, "error");
     }
   };
 

@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase"; // Certifique-se de que o db está exportado do seu firebase.js
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { notify } from "../services/notificationService";
 
 const EditBookingPage = () => {
   const { id } = useParams();
@@ -17,6 +24,23 @@ const EditBookingPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [spaces, setSpaces] = useState([]);
+
+  useEffect(() => {
+    const fetchSpaces = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "spaces"));
+        const spacesList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSpaces(spacesList);
+      } catch (error) {
+        notify("Erro ao carregar os espaços desportivos.", "error");
+      }
+    };
+    fetchSpaces();
+  }, []);
 
   useEffect(() => {
     const fetchBooking = async () => {
@@ -26,11 +50,11 @@ const EditBookingPage = () => {
         if (docSnap.exists()) {
           setForm(docSnap.data());
         } else {
-          alert("Reserva não encontrada");
+          notify("Reserva não encontrada", "error");
           navigate("/bookings");
         }
       } catch (error) {
-        alert("Erro ao carregar dados da reserva", error);
+        notify("Erro ao carregar dados da reserva", "error");
         navigate("/bookings");
       } finally {
         setIsLoading(false);
@@ -71,9 +95,10 @@ const EditBookingPage = () => {
         ...form,
         updatedAt: new Date().toISOString(),
       });
+      notify("Reserva atualizada com sucesso!", "success");
       navigate("/bookings");
     } catch (error) {
-      alert("Erro ao atualizar reserva", error);
+      notify("Erro ao atualizar reserva", "error");
     }
   };
 
@@ -110,19 +135,28 @@ const EditBookingPage = () => {
             )}
           </div>
 
-          {/* Espaço */}
+          {/* Espaço Desportivo */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
               Espaço Desportivo *
             </label>
-            <input
+            <select
               name="space"
               value={form.space}
               onChange={handleChange}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
                 errors.space ? "border-red-500" : ""
               }`}
-            />
+            >
+              <option value="">Selecione um espaço</option>
+              {spaces
+                .filter((s) => s.available || s.name === form.space)
+                .map((space) => (
+                  <option key={space.id} value={space.name}>
+                    {space.available ? "✅" : "⚠️"} {space.name}
+                  </option>
+                ))}
+            </select>
             {errors.space && (
               <p className="text-red-500 text-sm mt-1">{errors.space}</p>
             )}

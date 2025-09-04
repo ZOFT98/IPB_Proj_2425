@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { resetPassword } from "../firebase/authService";
+import { notify } from "../services/notificationService";
 
 export default function PasswordRecoveryPage() {
   const navigate = useNavigate();
@@ -11,10 +12,13 @@ export default function PasswordRecoveryPage() {
 
     try {
       await resetPassword(email);
-      alert("Se o email existir, um link de recuperação foi enviado.");
+      notify(
+        "Se o email existir, um link de recuperação foi enviado.",
+        "success",
+      );
       navigate("/");
     } catch (error) {
-      alert("Erro ao enviar email de recuperação: " + error.message);
+      notify("Erro ao enviar email de recuperação: " + error.message, "error");
     }
   };
 

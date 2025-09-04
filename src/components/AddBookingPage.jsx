@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { db } from "../firebase";
+import { notify } from "../services/notificationService";
+
 const AddBookingPage = () => {
   const [form, setForm] = useState({
     title: "",
@@ -12,8 +21,26 @@ const AddBookingPage = () => {
     description: "",
     status: "pending",
   });
+  const [spaces, setSpaces] = useState([]);
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchSpaces = async () => {
+      try {
+        const q = query(collection(db, "spaces"), where("available", "==", true));
+        const querySnapshot = await getDocs(q);
+        const spacesList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSpaces(spacesList);
+      } catch (error) {
+        notify("Erro ao carregar os espaços desportivos.", "error");
+      }
+    };
+    fetchSpaces();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -50,9 +77,10 @@ const AddBookingPage = () => {
       };
 
       await addDoc(collection(db, "bookings"), docData);
+      notify("Reserva adicionada com sucesso!", "success");
       navigate("/bookings");
     } catch (error) {
-      alert("Erro ao adicionar reserva.", error);
+      notify("Erro ao adicionar reserva.", "error");
     }
   };
 
@@ -87,13 +115,19 @@ const AddBookingPage = () => {
             <label className="block text-sm font-medium mb-1">
               Espaço Desportivo *
             </label>
-            <input
+            <select
               name="space"
               value={form.space}
               onChange={handleChange}
-              placeholder="Espaço Desportivo"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
-            />
+            >
+              <option value="">Selecione um espaço</option>
+              {spaces.map((space) => (
+                <option key={space.id} value={space.name}>
+                  ✅ {space.name}
+                </option>
+              ))}
+            </select>
             {errors.space && (
               <p className="text-red-500 text-sm mt-1">{errors.space}</p>
             )}

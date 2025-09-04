@@ -3,6 +3,7 @@ import { FaBasketball } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { login } from "../firebase/authService";
 import { useState, useEffect } from "react";
+import { notify } from "../services/notificationService";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -29,9 +30,10 @@ export default function LoginPage() {
       } else {
         localStorage.removeItem("rememberedEmail");
       }
+      notify("Sessão iniciada com sucesso!", "success");
       navigate("/home");
     } catch (error) {
-      alert("Erro ao iniciar sessão: " + error.message);
+      notify("Erro ao iniciar sessão: " + error.message, "error");
     }
   };
 

@@ -15,6 +15,8 @@ import {
   FaTimesCircle,
   FaHourglassHalf,
 } from "react-icons/fa";
+import { notify } from "../services/notificationService";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const statusInfo = {
   confirmed: {
@@ -36,6 +38,8 @@ const statusInfo = {
 
 const Bookings = () => {
   const [bookings, setBookings] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState(null);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
@@ -54,16 +58,26 @@ const Bookings = () => {
       }));
       setBookings(data);
     } catch (error) {
-      alert("Erro ao carregar reservas.", error);
+      notify("Erro ao carregar reservas.", "error");
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setBookingToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!bookingToDelete) return;
     try {
-      await deleteDoc(doc(db, "bookings", id));
-      setBookings((prev) => prev.filter((booking) => booking.id !== id));
+      await deleteDoc(doc(db, "bookings", bookingToDelete));
+      setBookings((prev) => prev.filter((booking) => booking.id !== bookingToDelete));
+      notify("Reserva apagada com sucesso!", "success");
     } catch (error) {
-      alert("Erro ao apagar. Tente novamente.", error);
+      notify("Erro ao apagar. Tente novamente.", "error");
+    } finally {
+      setIsModalOpen(false);
+      setBookingToDelete(null);
     }
   };
 
@@ -82,6 +96,13 @@ const Bookings = () => {
             </button>
           )}
         </div>
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirmar Eliminação"
+          message="Tem a certeza de que pretende eliminar esta reserva?"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {bookings.map((booking) => {

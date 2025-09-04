@@ -16,6 +16,8 @@ import {
   FaExclamationCircle,
 } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
+import { notify } from "../services/notificationService";
+import ConfirmationModal from "../components/ConfirmationModal";
 
 const statusInfo = {
   completed: {
@@ -42,6 +44,8 @@ const statusInfo = {
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState(null);
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
@@ -56,7 +60,8 @@ const Tickets = () => {
       }));
       setTickets(docs);
     } catch (error) {
-      alert("Erro ao carregar tickets.", error);
+      console.error(error);
+      notify("Erro ao carregar tickets.", "error");
     }
   };
 
@@ -64,12 +69,23 @@ const Tickets = () => {
     fetchTickets();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
+    setTicketToDelete(id);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!ticketToDelete) return;
     try {
-      await deleteDoc(doc(db, "tickets", id));
-      setTickets((prev) => prev.filter((t) => t.id !== id));
+      await deleteDoc(doc(db, "tickets", ticketToDelete));
+      setTickets((prev) => prev.filter((t) => t.id !== ticketToDelete));
+      notify("Ticket apagado com sucesso!", "success");
     } catch (error) {
-      alert("Erro ao apagar. Tente novamente.", error);
+      console.error(error);
+      notify("Erro ao apagar. Tente novamente.", "error");
+    } finally {
+      setIsModalOpen(false);
+      setTicketToDelete(null);
     }
   };
 
@@ -88,6 +104,14 @@ const Tickets = () => {
             </button>
           )}
         </div>
+
+        <ConfirmationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirmar Eliminação"
+          message="Tem a certeza de que pretende eliminar este ticket?"
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {tickets.map((ticket) => {

@@ -7,7 +7,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import MapContainer from "../components/MapContainer";
+import LeafletMap from "../components/LeafletMap";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,15 +15,23 @@ import {
   FaBuilding,
   FaUserPlus,
   FaTicketAlt,
+  FaMapMarkerAlt,
+  FaEuroSign,
+  FaFutbol,
+  FaClock,
+  FaUsers,
+  FaTableTennis,
 } from "react-icons/fa";
+import { FaBasketball } from "react-icons/fa6";
 
 const HomePage = () => {
   const [bookings, setBookings] = useState([]);
   const [tickets, setTickets] = useState([]);
+  const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [displayDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [eventDays, setEventDays] = useState(new Set()); // State for days with events
+  const [eventDays, setEventDays] = useState(new Set());
 
   const bookingStatusEmojis = {
     confirmed: "✅",
@@ -41,6 +49,19 @@ const HomePage = () => {
   const monthName = displayDate.toLocaleString("pt-PT", { month: "long" });
   const daysInMonth = new Date(displayYear, displayMonth + 1, 0).getDate();
   const firstDayOfMonth = new Date(displayYear, displayMonth, 1).getDay();
+
+  const modalityIcons = {
+    Futebol: <FaFutbol className="mr-2" />,
+    Futsal: <FaFutbol className="mr-2" />,
+    Basquetebol: <FaBasketball className="mr-2" />,
+    Tenis: <FaTableTennis className="mr-2" />,
+  };
+
+  const getModalityIcon = (modality) => {
+    return (
+      modalityIcons[modality] || <FaFutbol className="mr-2 text-gray-400" />
+    );
+  };
 
   const handleDateClick = (day) => {
     const newSelectedDate = new Date(displayYear, displayMonth, day);
@@ -107,6 +128,19 @@ const HomePage = () => {
     }
     return days;
   };
+
+  useEffect(() => {
+    const fetchSpaces = async () => {
+      const spacesCollection = collection(db, "spaces");
+      const spacesSnapshot = await getDocs(spacesCollection);
+      const spacesList = spacesSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSpaces(spacesList);
+    };
+    fetchSpaces();
+  }, []);
 
   useEffect(() => {
     const fetchMonthEvents = async () => {
@@ -202,6 +236,64 @@ const HomePage = () => {
     if (selectedDate) fetchEvents();
   }, [selectedDate]);
 
+  const spaceMarkers = spaces
+    .filter((space) => space.latitude && space.longitude)
+    .map((space) => ({
+      position: [space.latitude, space.longitude],
+      popupContent: (
+        <div style={{ lineHeight: "1.4" }}>
+          <img
+            src={space.image || "src/uploads/field1.jpg"}
+            alt={space.name}
+            style={{
+              width: "150px",
+              height: "100px",
+              objectFit: "cover",
+              borderRadius: "8px",
+            }}
+          />
+          <h3
+            style={{
+              fontWeight: "bold",
+              marginTop: "10px",
+              marginBottom: "5px",
+            }}
+          >
+            {space.name}
+          </h3>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+            {getModalityIcon(space.modality)}
+            <span>{space.modality}</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+            <FaEuroSign className="mr-2" />
+            <span>{space.price}€/h</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+            <FaClock className="mr-2" />
+            <span>
+              {space.openingTime} - {space.closingTime}
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+            <FaUsers className="mr-2" />
+            <span>{space.maxCapacity}</span>
+          </div>
+          <div
+            style={{
+              color: space.available ? "#28a745" : "#dc3545",
+              fontWeight: "bold",
+              display: "flex",
+              alignItems: "center",
+              marginTop: "8px",
+            }}
+          >
+            {space.available ? "Disponível" : "Indisponível"}
+          </div>
+        </div>
+      ),
+    }));
+
   return (
     <div className="flex flex-col h-full dark:text-gray-100">
       {/* Quick Actions */}
@@ -241,7 +333,11 @@ const HomePage = () => {
           <div className="h-full">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md h-full overflow-hidden">
               <div className="h-[600px]">
-                <MapContainer />
+                <LeafletMap
+                  center={[41.79685, -6.76843]}
+                  zoom={15}
+                  markers={spaceMarkers}
+                />
               </div>
             </div>
           </div>

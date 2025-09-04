@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  getDocs,
+  query,
+} from "firebase/firestore";
+import { notify } from "../services/notificationService";
 
 const AddTicketPage = () => {
   const navigate = useNavigate();
@@ -15,6 +22,25 @@ const AddTicketPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [spaces, setSpaces] = useState([]);
+
+  useEffect(() => {
+    const fetchSpaces = async () => {
+      try {
+        const q = query(collection(db, "spaces"));
+        const querySnapshot = await getDocs(q);
+        const spacesList = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setSpaces(spacesList);
+      } catch (error) {
+        console.error("Erro ao carregar os espaços desportivos.", error);
+        notify("Erro ao carregar os espaços desportivos.", "error");
+      }
+    };
+    fetchSpaces();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -52,9 +78,11 @@ const AddTicketPage = () => {
       };
 
       await addDoc(collection(db, "tickets"), ticketData);
+      notify("Ticket adicionado com sucesso!", "success");
       navigate("/tickets");
     } catch (error) {
-      alert(`Erro: ${error.message}`);
+      console.error("Erro ao adicionar ticket:", error);
+      notify(`Erro: ${error.message}`, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -119,16 +147,22 @@ const AddTicketPage = () => {
               htmlFor="space"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
             >
-              Espaço *
+              Espaço Desportivo *
             </label>
-            <input
+            <select
               id="space"
               name="space"
               value={form.space}
               onChange={handleChange}
-              placeholder="Espaço"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
-            />
+            >
+              <option value="">Selecione um espaço</option>
+              {spaces.map((space) => (
+                <option key={space.id} value={space.name}>
+                  {space.name}
+                </option>
+              ))}
+            </select>
             {errors.space && (
               <p className="text-red-500 text-sm mt-1">{errors.space}</p>
             )}

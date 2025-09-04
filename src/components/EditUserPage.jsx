@@ -7,6 +7,7 @@ import defaultUserImage from "../uploads/default-profile.jpg";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { FaKey } from "react-icons/fa";
 import { auth } from "../firebase";
+import { notify } from "../services/notificationService";
 
 const EditUserPage = () => {
   const { id } = useParams();
@@ -40,11 +41,11 @@ const EditUserPage = () => {
             setPreview(defaultUserImage);
           }
         } else {
-          alert("Usuário não encontrado");
+          notify("Usuário não encontrado", "error");
           navigate("/users");
         }
       } catch (error) {
-        alert("Erro ao carregar usuário.", error);
+        notify("Erro ao carregar usuário.", "error");
         navigate("/users");
       }
     };
@@ -80,12 +81,12 @@ const EditUserPage = () => {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Por favor, selecione um arquivo de imagem válido");
+      notify("Por favor, selecione um arquivo de imagem válido", "warning");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      alert("A imagem deve ser menor que 5MB");
+      notify("A imagem deve ser menor que 5MB", "warning");
       return;
     }
 
@@ -95,16 +96,17 @@ const EditUserPage = () => {
 
   const handlePasswordReset = async () => {
     if (!form.email) {
-      alert("Email do utilizador não encontrado.");
+      notify("Email do utilizador não encontrado.", "error");
       return;
     }
     try {
       await sendPasswordResetEmail(auth, form.email);
-      alert(
+      notify(
         `Email de redefinição de palavra-passe enviado para ${form.email}.`,
+        "success",
       );
     } catch (error) {
-      alert("Erro ao enviar email de redefinição: " + error.message);
+      notify("Erro ao enviar email de redefinição: " + error.message, "error");
     }
   };
 
@@ -149,14 +151,17 @@ const EditUserPage = () => {
       await updateDoc(doc(db, "users", id), updatedData);
 
       if (form.role !== originalRole) {
-        alert(
+        notify(
           "Role atualizado com sucesso! O utilizador precisa de fazer logout e login novamente para que as novas permissões sejam aplicadas.",
+          "info",
         );
+      } else {
+        notify("Utilizador atualizado com sucesso!", "success");
       }
 
       navigate("/users");
     } catch (error) {
-      alert("Erro ao atualizar usuário.", error);
+      notify("Erro ao atualizar usuário.", "error");
     }
   };
 
