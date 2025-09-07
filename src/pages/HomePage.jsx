@@ -263,21 +263,45 @@ const HomePage = () => {
           >
             {space.name}
           </h3>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "4px",
+            }}
+          >
             {getModalityIcon(space.modality)}
             <span>{space.modality}</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "4px",
+            }}
+          >
             <FaEuroSign className="mr-2" />
             <span>{space.price}€/h</span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "4px",
+            }}
+          >
             <FaClock className="mr-2" />
             <span>
               {space.openingTime} - {space.closingTime}
             </span>
           </div>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginBottom: "4px",
+            }}
+          >
             <FaUsers className="mr-2" />
             <span>{space.maxCapacity}</span>
           </div>

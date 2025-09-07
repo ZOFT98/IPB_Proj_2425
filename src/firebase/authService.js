@@ -10,9 +10,20 @@ import { createUserDocument } from "./firestoreService";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export async function register(userData) {
-  const { email, password, name, role = "admin", photoURL, ...profileData } = userData;
+  const {
+    email,
+    password,
+    name,
+    role = "admin",
+    photoURL,
+    ...profileData
+  } = userData;
 
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
   const { user } = userCredential;
 
   let downloadURL = null;
@@ -22,9 +33,9 @@ export async function register(userData) {
     downloadURL = await getDownloadURL(snapshot.ref);
   }
 
-  await updateProfile(user, { 
-    displayName: name, 
-    photoURL: downloadURL 
+  await updateProfile(user, {
+    displayName: name,
+    photoURL: downloadURL,
   });
 
   await createUserDocument(user.uid, {

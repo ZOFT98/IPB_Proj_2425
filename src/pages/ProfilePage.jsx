@@ -1,5 +1,14 @@
 import { useAuth } from "../contexts/AuthContext";
-import { FaUser, FaEnvelope, FaMapMarkerAlt, FaPhone, FaBirthdayCake, FaVenusMars, FaUserTag, FaEdit } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaBirthdayCake,
+  FaVenusMars,
+  FaUserTag,
+  FaEdit,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import defaultProfileImage from "../uploads/default-profile.jpg";
 
@@ -22,9 +31,17 @@ const ProfilePage = () => {
     { icon: <FaEnvelope />, label: "Email", value: currentUser?.email },
     { icon: <FaMapMarkerAlt />, label: "Morada", value: currentUser?.address },
     { icon: <FaPhone />, label: "Contacto", value: currentUser?.contact },
-    { icon: <FaBirthdayCake />, label: "Data de Nascimento", value: currentUser?.birthdate },
+    {
+      icon: <FaBirthdayCake />,
+      label: "Data de Nascimento",
+      value: currentUser?.birthdate,
+    },
     { icon: <FaVenusMars />, label: "Gênero", value: currentUser?.gender },
-    { icon: <FaUserTag />, label: "Função", value: getDisplayRole(currentUser?.role) },
+    {
+      icon: <FaUserTag />,
+      label: "Função",
+      value: getDisplayRole(currentUser?.role),
+    },
   ];
 
   return (
@@ -59,11 +76,11 @@ const ProfilePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {profileInfo.map((item, index) => (
                 <div key={index} className="flex items-center space-x-4">
-                  <div className="text-green-500 text-xl">
-                    {item.icon}
-                  </div>
+                  <div className="text-green-500 text-xl">{item.icon}</div>
                   <div>
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{item.label}</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                      {item.label}
+                    </p>
                     <p className="text-md font-semibold text-gray-800 dark:text-gray-200">
                       {item.value || "Não disponível"}
                     </p>

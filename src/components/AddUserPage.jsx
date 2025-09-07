@@ -111,7 +111,11 @@ const AddUserPage = () => {
               />
             ) : (
               <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
-                <img src={defaultProfileImage} alt="Default" className="w-32 h-32 rounded-full object-cover"/>
+                <img
+                  src={defaultProfileImage}
+                  alt="Default"
+                  className="w-32 h-32 rounded-full object-cover"
+                />
               </div>
             )}
             <input

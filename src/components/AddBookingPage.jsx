@@ -28,7 +28,10 @@ const AddBookingPage = () => {
   useEffect(() => {
     const fetchSpaces = async () => {
       try {
-        const q = query(collection(db, "spaces"), where("available", "==", true));
+        const q = query(
+          collection(db, "spaces"),
+          where("available", "==", true),
+        );
         const querySnapshot = await getDocs(q);
         const spacesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
@@ -97,12 +100,12 @@ const AddBookingPage = () => {
 
           {/* Title */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Titulo *</label>
+            <label className="block text-sm font-medium mb-1">Reserva em nome de: *</label>
             <input
               name="title"
               value={form.title}
               onChange={handleChange}
-              placeholder="Reservado por:"
+              placeholder="Reserva em nome de:"
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
             />
             {errors.title && (
@@ -113,7 +116,7 @@ const AddBookingPage = () => {
           {/* Space */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
-              Espaço Desportivo *
+              Espaço *
             </label>
             <select
               name="space"

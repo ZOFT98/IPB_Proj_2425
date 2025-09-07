@@ -71,7 +71,9 @@ const Bookings = () => {
     if (!bookingToDelete) return;
     try {
       await deleteDoc(doc(db, "bookings", bookingToDelete));
-      setBookings((prev) => prev.filter((booking) => booking.id !== bookingToDelete));
+      setBookings((prev) =>
+        prev.filter((booking) => booking.id !== bookingToDelete),
+      );
       notify("Reserva apagada com sucesso!", "success");
     } catch (error) {
       notify("Erro ao apagar. Tente novamente.", "error");

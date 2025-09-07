@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -8,8 +8,10 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { FaKey } from "react-icons/fa";
 import { auth } from "../firebase";
 import { notify } from "../services/notificationService";
+import { AuthContext } from "../contexts/AuthContext";
 
 const EditUserPage = () => {
+  const { currentUser, refreshCurrentUser } = useContext(AuthContext);
   const { id } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -25,6 +27,7 @@ const EditUserPage = () => {
   const [originalRole, setOriginalRole] = useState("");
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -114,14 +117,12 @@ const EditUserPage = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
       let photoURL = form.photoURL;
 
       if (form.photoURL instanceof File) {
-        const imageRef = ref(
-          storage,
-          `users/${id}/${form.photoURL.name}`
-        );
+        const imageRef = ref(storage, `users/${id}/${form.photoURL.name}`);
         const snapshot = await uploadBytes(imageRef, form.photoURL);
         photoURL = await getDownloadURL(snapshot.ref);
       }
@@ -134,16 +135,27 @@ const EditUserPage = () => {
         birthdate: form.birthdate,
         gender: form.gender,
         photoURL: photoURL,
-        role: form.role,
       };
+
+      if (currentUser?.role === "superadmin") {
+        updatedData.role = form.role;
+      }
 
       await updateDoc(doc(db, "users", id), updatedData);
 
-      if (form.role !== originalRole) {
-        notify(
-          "Role atualizado com sucesso! O utilizador precisa de fazer logout e login novamente para que as novas permissões sejam aplicadas.",
-          "info",
-        );
+      if (currentUser?.role === "superadmin" && form.role !== originalRole) {
+        if (currentUser.uid === id) {
+          await refreshCurrentUser();
+          notify(
+            "A sua role foi atualizada! As suas novas permissões já estão ativas.",
+            "success",
+          );
+        } else {
+          notify(
+            "Role atualizado com sucesso! O utilizador precisa de fazer logout e login novamente para que as novas permissões sejam aplicadas.",
+            "info",
+          );
+        }
       } else {
         notify("Utilizador atualizado com sucesso!", "success");
       }
@@ -151,6 +163,8 @@ const EditUserPage = () => {
       navigate("/users");
     } catch (error) {
       notify("Erro ao atualizar usuário.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -284,8 +298,13 @@ const EditUserPage = () => {
               name="role"
               value={form.role}
               onChange={handleChange}
+              disabled={currentUser?.role !== "superadmin"}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
                 errors.role ? "border-red-500" : ""
+              } ${
+                currentUser?.role !== "superadmin"
+                  ? "cursor-not-allowed bg-gray-200 dark:bg-gray-600"
+                  : ""
               }`}
             >
               <option value="admin">Administrador</option>
@@ -315,9 +334,36 @@ const EditUserPage = () => {
           <div className="flex gap-2 justify-center mt-4">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              disabled={isSubmitting}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center w-40"
             >
-              Atualizar
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Atualizando...
+                </>
+              ) : (
+                "Atualizar"
+              )}
             </button>
             <button
               type="button"

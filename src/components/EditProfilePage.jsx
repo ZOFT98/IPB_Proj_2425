@@ -21,6 +21,7 @@ const EditProfilePage = () => {
   });
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -42,7 +43,8 @@ const EditProfilePage = () => {
     if (!form.name.trim()) newErrors.name = "Nome é obrigatório";
     if (!form.address.trim()) newErrors.address = "Morada é obrigatória";
     if (!form.contact.trim()) newErrors.contact = "Contacto é obrigatório";
-    if (!form.birthdate) newErrors.birthdate = "Data de nascimento é obrigatória";
+    if (!form.birthdate)
+      newErrors.birthdate = "Data de nascimento é obrigatória";
     if (!form.gender) newErrors.gender = "Gênero é obrigatório";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -76,10 +78,14 @@ const EditProfilePage = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
+    setIsSubmitting(true);
     try {
       let photoURL = form.photoURL;
       if (form.photoURL instanceof File) {
-        const imageRef = ref(storage, `users/${currentUser.uid}/${form.photoURL.name}`);
+        const imageRef = ref(
+          storage,
+          `users/${currentUser.uid}/${form.photoURL.name}`,
+        );
         const uploadTask = uploadBytesResumable(imageRef, form.photoURL);
         photoURL = await getDownloadURL((await uploadTask).ref);
       }
@@ -92,16 +98,25 @@ const EditProfilePage = () => {
       navigate("/profile");
     } catch (error) {
       notify("Erro ao atualizar o perfil.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="dark:text-gray-100">
       <div className="mx-auto max-w-md px-4 py-8">
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+        >
           <h1 className="text-2xl font-bold mb-6 text-center">Editar Perfil</h1>
           <div className="mb-4 flex flex-col items-center">
-            <img src={preview} alt="Preview" className="w-32 h-32 rounded-full object-cover mb-2" />
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-32 h-32 rounded-full object-cover mb-2"
+            />
             <input
               type="file"
               accept="image/*"
@@ -116,7 +131,12 @@ const EditProfilePage = () => {
             { name: "contact", type: "text", label: "Contacto" },
           ].map(({ name, type, label }) => (
             <div className="mb-3" key={name}>
-              <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label} *</label>
+              <label
+                htmlFor={name}
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                {label} *
+              </label>
               <input
                 id={name}
                 name={name}
@@ -126,12 +146,19 @@ const EditProfilePage = () => {
                 placeholder={label}
                 className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[name] ? "border-red-500" : ""}`}
               />
-              {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name]}</p>}
+              {errors[name] && (
+                <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+              )}
             </div>
           ))}
 
           <div className="mb-3">
-            <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data de Nascimento *</label>
+            <label
+              htmlFor="birthdate"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Data de Nascimento *
+            </label>
             <input
               id="birthdate"
               name="birthdate"
@@ -140,11 +167,18 @@ const EditProfilePage = () => {
               onChange={handleChange}
               className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.birthdate ? "border-red-500" : ""}`}
             />
-            {errors.birthdate && <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>}
+            {errors.birthdate && (
+              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
+            )}
           </div>
 
           <div className="mb-4">
-            <label htmlFor="gender" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gênero *</label>
+            <label
+              htmlFor="gender"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Gênero *
+            </label>
             <select
               id="gender"
               name="gender"
@@ -156,12 +190,52 @@ const EditProfilePage = () => {
               <option value="Masculino">Masculino</option>
               <option value="Feminino">Feminino</option>
             </select>
-            {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
+            {errors.gender && (
+              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+            )}
           </div>
 
           <div className="flex gap-2 justify-center mt-4">
-            <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Atualizar</button>
-            <button type="button" onClick={() => navigate("/profile")} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center w-40"
+            >
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Atualizando...
+                </>
+              ) : (
+                "Atualizar"
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/profile")}
+              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>

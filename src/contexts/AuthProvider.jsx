@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { onAuthStateChanged, signOut, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import PropTypes from "prop-types";
 import { auth } from "../firebase";
 import { AuthContext } from "./AuthContext";
@@ -24,7 +28,11 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password,
+    );
     const userProfile = await getUserDocument(userCredential.user.uid);
     setCurrentUser(userProfile);
     return userProfile;
@@ -41,7 +49,9 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, login, logout, refreshCurrentUser }}>
+    <AuthContext.Provider
+      value={{ currentUser, login, logout, refreshCurrentUser }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

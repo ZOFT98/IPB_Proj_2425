@@ -371,9 +371,7 @@ const AddSpacePage = () => {
                   <option value="Outros">Outros Eventos</option>
                 </select>
                 {errors.modality && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.modality}
-                  </p>
+                  <p className="text-red-500 text-sm mt-1">{errors.modality}</p>
                 )}
               </div>
 

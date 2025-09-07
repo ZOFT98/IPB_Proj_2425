@@ -4,7 +4,10 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4"
+      onClick={onClose}
+    >
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
           {title}
