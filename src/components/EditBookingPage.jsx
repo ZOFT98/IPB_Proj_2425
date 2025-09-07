@@ -125,7 +125,7 @@ const EditBookingPage = () => {
         >
           {/* Título */}
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Título *</label>
+            <label className="block text-sm font-medium mb-1">Reserva em nome de *</label>
             <input
               name="title"
               value={form.title}
@@ -142,7 +142,7 @@ const EditBookingPage = () => {
           {/* Espaço Desportivo */}
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
-              Espaço Desportivo *
+              Espaço *
             </label>
             <select
               name="space"
