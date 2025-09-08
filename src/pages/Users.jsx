@@ -12,6 +12,7 @@ import {
   FaBirthdayCake,
   FaVenusMars,
 } from "react-icons/fa";
+import { FaFilterCircleXmark } from "react-icons/fa6";
 import { useAuth } from "../contexts/AuthContext";
 import { notify } from "../services/notificationService";
 import ConfirmationModal from "../components/ConfirmationModal";
@@ -32,6 +33,7 @@ const Users = () => {
   const [users, setUsers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const [filterRole, setFilterRole] = useState("");
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
@@ -86,6 +88,14 @@ const Users = () => {
     }
   };
 
+  const handleResetFilters = () => {
+    setFilterRole("");
+  };
+
+  const filteredUsers = users.filter((user) => {
+    return filterRole ? user.role === filterRole : true;
+  });
+
   return (
     <div className="flex dark:text-gray-100">
       <main className="flex-1">
@@ -102,6 +112,25 @@ const Users = () => {
           )}
         </div>
 
+        <div className="flex gap-4 mb-6 items-center">
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+          >
+            <option value="">Todas as Roles</option>
+            <option value="admin">Administrador</option>
+            <option value="superadmin">Super Administrador</option>
+          </select>
+          <button
+            onClick={handleResetFilters}
+            className="p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            title="Resetar Filtros"
+          >
+            <FaFilterCircleXmark />
+          </button>
+        </div>
+
         <ConfirmationModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -111,7 +140,7 @@ const Users = () => {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {users.map((user) => (
+          {filteredUsers.map((user) => (
             <div
               key={user.id}
               className="p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col"

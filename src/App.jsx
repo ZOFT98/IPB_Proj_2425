@@ -55,7 +55,7 @@ function App() {
       ) : (
         <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
           <Navbar />
-          <main className="flex-1 p-8 overflow-y-auto">
+          <main className="flex-1 pb-8 pt-4 px-8 overflow-y-auto">
             <Routes>
               <Route
                 path="/home"

@@ -6,6 +6,14 @@ import { useAuth } from "../contexts/AuthContext";
 import { updateUser } from "../firebase/firestoreService";
 import { notify } from "../services/notificationService";
 import defaultProfileImage from "../uploads/default-profile.jpg";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaUser,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaBirthdayCake,
+  FaVenusMars,
+} from "react-icons/fa";
 
 const EditProfilePage = () => {
   const navigate = useNavigate();
@@ -22,6 +30,7 @@ const EditProfilePage = () => {
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -74,10 +83,14 @@ const EditProfilePage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
 
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setIsSubmitting(true);
     try {
       let photoURL = form.photoURL;
@@ -104,102 +117,167 @@ const EditProfilePage = () => {
   };
 
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-md px-4 py-8">
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8 text-center">Editar Perfil</h1>
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+          className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-2xl"
         >
-          <h1 className="text-2xl font-bold mb-6 text-center">Editar Perfil</h1>
-          <div className="mb-4 flex flex-col items-center">
-            <img
-              src={preview}
-              alt="Preview"
-              className="w-32 h-32 rounded-full object-cover mb-2"
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center mb-8">
+            <div className="md:col-span-1 flex justify-center">
+              <div className="flex flex-col items-center">
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="w-32 h-32 rounded-full object-cover mb-4 border-4 border-gray-200 dark:border-gray-700"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
+              </div>
+            </div>
+            <div className="md:col-span-2 grid grid-cols-1 gap-6">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Nome *
+                </label>
+                <div className="relative">
+                  <FaUser className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Nome"
+                    className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                      errors.name ? "border-red-500" : ""
+                    }`}
+                  />
+                </div>
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Morada *
+                </label>
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="address"
+                    name="address"
+                    type="text"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Morada"
+                    className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
+                  />
+                </div>
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                )}
+              </div>
+            </div>
           </div>
 
-          {[
-            { name: "name", type: "text", label: "Nome" },
-            { name: "address", type: "text", label: "Morada" },
-            { name: "contact", type: "text", label: "Contacto" },
-          ].map(({ name, type, label }) => (
-            <div className="mb-3" key={name}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
               <label
-                htmlFor={name}
+                htmlFor="contact"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                {label} *
+                Contacto *
               </label>
-              <input
-                id={name}
-                name={name}
-                type={type}
-                value={form[name]}
-                onChange={handleChange}
-                placeholder={label}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[name] ? "border-red-500" : ""}`}
-              />
-              {errors[name] && (
-                <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+              <div className="relative">
+                <FaPhone className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  id="contact"
+                  name="contact"
+                  type="text"
+                  value={form.contact}
+                  onChange={handleChange}
+                  placeholder="Contacto"
+                  className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                    errors.contact ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.contact && (
+                <p className="text-red-500 text-sm mt-1">{errors.contact}</p>
               )}
             </div>
-          ))}
-
-          <div className="mb-3">
-            <label
-              htmlFor="birthdate"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Data de Nascimento *
-            </label>
-            <input
-              id="birthdate"
-              name="birthdate"
-              type="date"
-              value={form.birthdate}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.birthdate ? "border-red-500" : ""}`}
-            />
-            {errors.birthdate && (
-              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
-            )}
+            <div>
+              <label
+                htmlFor="birthdate"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Data de Nascimento *
+              </label>
+              <div className="relative">
+                <FaBirthdayCake className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  id="birthdate"
+                  name="birthdate"
+                  type="date"
+                  value={form.birthdate}
+                  onChange={handleChange}
+                  className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                    errors.birthdate ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.birthdate && (
+                <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Gênero *
+              </label>
+              <div className="relative">
+                <FaVenusMars className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                <select
+                  id="gender"
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                    errors.gender ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Selecione o Gênero</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+              )}
+            </div>
           </div>
 
-          <div className="mb-4">
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Gênero *
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.gender ? "border-red-500" : ""}`}
-            >
-              <option value="">Selecione o Gênero</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-            </select>
-            {errors.gender && (
-              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-            )}
-          </div>
-
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex gap-4 justify-center mt-8">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center w-40"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 flex items-center justify-center w-40 transition-colors"
             >
               {isSubmitting ? (
                 <>
@@ -232,13 +310,21 @@ const EditProfilePage = () => {
             <button
               type="button"
               onClick={() => navigate("/profile")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Atualização de Perfil"
+        message="Tem certeza de que deseja atualizar seu perfil?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };

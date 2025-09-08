@@ -1,14 +1,24 @@
 import PropTypes from "prop-types";
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmButtonClass = "bg-red-600 hover:bg-red-700",
+}) => {
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 z-50 flex justify-center items-center p-4"
+      className="fixed inset-0 bg-black/80 flex justify-center items-center p-4 !z-[1000]"
       onClick={onClose}
     >
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+      <div
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">
           {title}
         </h2>
@@ -22,7 +32,7 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className={`px-4 py-2 text-white rounded-md transition-colors ${confirmButtonClass}`}
           >
             Confirmar
           </button>
@@ -38,6 +48,7 @@ ConfirmationModal.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
   message: PropTypes.string.isRequired,
+  confirmButtonClass: PropTypes.string,
 };
 
 export default ConfirmationModal;

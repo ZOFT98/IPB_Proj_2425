@@ -17,6 +17,7 @@ import {
   FaUsers,
   FaCalendarAlt,
 } from "react-icons/fa";
+import { FaFilterCircleXmark } from "react-icons/fa6";
 import { FaBasketball } from "react-icons/fa6";
 import { notify } from "../services/notificationService";
 import ConfirmationModal from "../components/ConfirmationModal";
@@ -38,6 +39,8 @@ const Spaces = () => {
   const [spaces, setSpaces] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [spaceToDelete, setSpaceToDelete] = useState(null);
+  const [filterModality, setFilterModality] = useState("");
+  const [filterAvailability, setFilterAvailability] = useState("");
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const isAdmin = currentUser && currentUser.role === "admin";
@@ -79,6 +82,24 @@ const Spaces = () => {
     }
   };
 
+  const handleResetFilters = () => {
+    setFilterModality("");
+    setFilterAvailability("");
+  };
+
+  const uniqueModalities = [...new Set(spaces.map((s) => s.modality))];
+
+  const filteredSpaces = spaces.filter((space) => {
+    const modalityMatch = filterModality
+      ? space.modality === filterModality
+      : true;
+    const availabilityMatch =
+      filterAvailability === ""
+        ? true
+        : space.available === (filterAvailability === "true");
+    return modalityMatch && availabilityMatch;
+  });
+
   return (
     <div className="flex dark:text-gray-100">
       <main className="flex-1">
@@ -95,6 +116,37 @@ const Spaces = () => {
           )}
         </div>
 
+        <div className="flex gap-4 mb-6 items-center">
+          <select
+            value={filterModality}
+            onChange={(e) => setFilterModality(e.target.value)}
+            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+          >
+            <option value="">Todas as Modalidades</option>
+            {uniqueModalities.map((modality) => (
+              <option key={modality} value={modality}>
+                {modality}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterAvailability}
+            onChange={(e) => setFilterAvailability(e.target.value)}
+            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+          >
+            <option value="">Todos os Estados</option>
+            <option value="true">Disponível</option>
+            <option value="false">Indisponível</option>
+          </select>
+          <button
+            onClick={handleResetFilters}
+            className="p-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+            title="Resetar Filtros"
+          >
+            <FaFilterCircleXmark />
+          </button>
+        </div>
+
         <ConfirmationModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -104,7 +156,7 @@ const Spaces = () => {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {spaces.map((space) => (
+          {filteredSpaces.map((space) => (
             <div
               key={space.id}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300 flex flex-col overflow-hidden"

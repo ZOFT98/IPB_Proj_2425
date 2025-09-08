@@ -5,6 +5,16 @@ import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import LeafletMap from "./LeafletMap";
 import { notify } from "../services/notificationService";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaSignature,
+  FaMapMarkerAlt,
+  FaMapPin,
+  FaEuroSign,
+  FaUsers,
+  FaClock,
+  FaFutbol,
+} from "react-icons/fa";
 
 const AddSpacePage = () => {
   const [form, setForm] = useState({
@@ -25,6 +35,7 @@ const AddSpacePage = () => {
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
   const [uploading, setUploading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -91,12 +102,9 @@ const AddSpacePage = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setUploading(true);
-
     try {
       // Cria um novo ID antecipadamente
       const newDocRef = doc(collection(db, "spaces"));
@@ -151,34 +159,31 @@ const AddSpacePage = () => {
     }
   };
 
-  const fields = [
-    { name: "name", label: "Nome", type: "text" },
-    { name: "address", label: "Morada", type: "text" },
-  ];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
 
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-        >
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Adicionar Instalação Desportiva
-          </h1>
-
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-6xl">
+        <h1 className="text-3xl font-bold mb-8 text-center">
+          Adicionar Instalação Desportiva
+        </h1>
+        <form onSubmit={handleSubmit}>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Coluna da Esquerda */}
             <div>
-              <div className="mb-4 flex flex-col items-center">
+              <div className="mb-6 flex flex-col items-center">
                 {preview ? (
                   <img
                     src={preview}
                     alt="Preview"
-                    className="w-32 h-32 rounded-lg object-cover mb-2"
+                    className="w-full h-48 rounded-lg object-cover mb-4 border-4 border-gray-200 dark:border-gray-700"
                   />
                 ) : (
-                  <div className="w-32 h-32 rounded-lg bg-gray-200 mb-2 flex items-center justify-center">
+                  <div className="w-full h-48 rounded-lg bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center">
                     <span className="text-gray-500">Sem imagem</span>
                   </div>
                 )}
@@ -191,34 +196,62 @@ const AddSpacePage = () => {
                 />
               </div>
 
-              {fields.map((field) => (
-                <div className="mb-3" key={field.name}>
-                  <label
-                    htmlFor={field.name}
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    {field.label} *
-                  </label>
+              {/* Nome */}
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Nome *
+                </label>
+                <div className="relative">
+                  <FaSignature className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
                   <input
-                    id={field.name}
-                    type={field.type}
-                    name={field.name}
-                    value={form[field.name]}
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={form.name}
                     onChange={handleChange}
-                    placeholder={field.label}
-                    pattern={field.pattern}
-                    title={field.title}
-                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
+                    placeholder="Nome da Instalação"
+                    className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                      errors.name ? "border-red-500" : ""
+                    }`}
                   />
-                  {errors[field.name] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors[field.name]}
-                    </p>
-                  )}
                 </div>
-              ))}
+                {errors.name && (
+                  <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                )}
+              </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              {/* Morada */}
+              <div className="mb-4">
+                <label
+                  htmlFor="address"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Morada *
+                </label>
+                <div className="relative">
+                  <FaMapMarkerAlt className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    id="address"
+                    type="text"
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    placeholder="Morada"
+                    className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
+                  />
+                </div>
+                {errors.address && (
+                  <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Código Postal */}
                 <div>
                   <label
                     htmlFor="postCode"
@@ -226,23 +259,29 @@ const AddSpacePage = () => {
                   >
                     Código-postal *
                   </label>
-                  <input
-                    id="postCode"
-                    type="text"
-                    name="postCode"
-                    value={form.postCode}
-                    onChange={handleChange}
-                    placeholder="0000-000"
-                    pattern="\d{4}-\d{3}"
-                    title="O formato deve ser XXXX-XXX"
-                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.postCode ? "border-red-500" : ""}`}
-                  />
+                  <div className="relative">
+                    <FaMapPin className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="postCode"
+                      type="text"
+                      name="postCode"
+                      value={form.postCode}
+                      onChange={handleChange}
+                      placeholder="0000-000"
+                      pattern="\d{4}-\d{3}"
+                      title="O formato deve ser XXXX-XXX"
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.postCode ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.postCode && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.postCode}
                     </p>
                   )}
                 </div>
+                {/* Localidade */}
                 <div>
                   <label
                     htmlFor="locality"
@@ -250,15 +289,20 @@ const AddSpacePage = () => {
                   >
                     Localidade *
                   </label>
-                  <input
-                    id="locality"
-                    type="text"
-                    name="locality"
-                    value={form.locality}
-                    onChange={handleChange}
-                    placeholder="Localidade"
-                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.locality ? "border-red-500" : ""}`}
-                  />
+                  <div className="relative">
+                    <FaMapMarkerAlt className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="locality"
+                      type="text"
+                      name="locality"
+                      value={form.locality}
+                      onChange={handleChange}
+                      placeholder="Localidade"
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.locality ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.locality && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.locality}
@@ -267,7 +311,8 @@ const AddSpacePage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Preço */}
                 <div>
                   <label
                     htmlFor="price"
@@ -275,19 +320,25 @@ const AddSpacePage = () => {
                   >
                     Preço por hora *
                   </label>
-                  <input
-                    id="price"
-                    type="number"
-                    name="price"
-                    value={form.price}
-                    onChange={handleChange}
-                    placeholder="Preço por hora"
-                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.price ? "border-red-500" : ""}`}
-                  />
+                  <div className="relative">
+                    <FaEuroSign className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="price"
+                      type="number"
+                      name="price"
+                      value={form.price}
+                      onChange={handleChange}
+                      placeholder="Preço"
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.price ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.price && (
                     <p className="text-red-500 text-sm mt-1">{errors.price}</p>
                   )}
                 </div>
+                {/* Lotação */}
                 <div>
                   <label
                     htmlFor="maxCapacity"
@@ -295,15 +346,20 @@ const AddSpacePage = () => {
                   >
                     Lotação Máxima *
                   </label>
-                  <input
-                    id="maxCapacity"
-                    type="number"
-                    name="maxCapacity"
-                    value={form.maxCapacity}
-                    onChange={handleChange}
-                    placeholder="Lotação Máxima"
-                    className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.maxCapacity ? "border-red-500" : ""}`}
-                  />
+                  <div className="relative">
+                    <FaUsers className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="maxCapacity"
+                      type="number"
+                      name="maxCapacity"
+                      value={form.maxCapacity}
+                      onChange={handleChange}
+                      placeholder="Lotação"
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.maxCapacity ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.maxCapacity && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.maxCapacity}
@@ -312,33 +368,55 @@ const AddSpacePage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-3">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                {/* Hora Abertura */}
                 <div>
-                  <label htmlFor="openingTime">Hora de Abertura *</label>
-                  <input
-                    id="openingTime"
-                    name="openingTime"
-                    type="time"
-                    value={form.openingTime}
-                    onChange={handleChange}
-                    className={`w-full p-2 border rounded ${errors.openingTime ? "border-red-500" : ""}`}
-                  />
+                  <label
+                    htmlFor="openingTime"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Hora de Abertura *
+                  </label>
+                  <div className="relative">
+                    <FaClock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="openingTime"
+                      name="openingTime"
+                      type="time"
+                      value={form.openingTime}
+                      onChange={handleChange}
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.openingTime ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.openingTime && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.openingTime}
                     </p>
                   )}
                 </div>
+                {/* Hora Fecho */}
                 <div>
-                  <label htmlFor="closingTime">Hora de Fecho *</label>
-                  <input
-                    id="closingTime"
-                    name="closingTime"
-                    type="time"
-                    value={form.closingTime}
-                    onChange={handleChange}
-                    className={`w-full p-2 border rounded ${errors.closingTime ? "border-red-500" : ""}`}
-                  />
+                  <label
+                    htmlFor="closingTime"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Hora de Fecho *
+                  </label>
+                  <div className="relative">
+                    <FaClock className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      id="closingTime"
+                      name="closingTime"
+                      type="time"
+                      value={form.closingTime}
+                      onChange={handleChange}
+                      className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                        errors.closingTime ? "border-red-500" : ""
+                      }`}
+                    />
+                  </div>
                   {errors.closingTime && (
                     <p className="text-red-500 text-sm mt-1">
                       {errors.closingTime}
@@ -347,31 +425,37 @@ const AddSpacePage = () => {
                 </div>
               </div>
 
-              <div className="mb-3">
+              {/* Modalidade */}
+              <div className="mb-4">
                 <label
                   htmlFor="modality"
                   className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                 >
                   Modalidade *
                 </label>
-                <select
-                  id="modality"
-                  name="modality"
-                  value={form.modality}
-                  onChange={handleChange}
-                  className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                    errors.modality ? "border-red-500" : ""
-                  }`}
-                >
-                  <option value="">Selecione a Modalidade</option>
-                  <option value="Futebol">Futebol</option>
-                  <option value="Basquetebol">Basquetebol</option>
-                  <option value="Tenis">Ténis</option>
-                  <option value="Futsal">Futsal</option>
-                  <option value="Outros">Outros Eventos</option>
-                </select>
+                <div className="relative">
+                  <FaFutbol className="absolute top-1/2 left-3 transform -translate-y-1/2 text-gray-400" />
+                  <select
+                    id="modality"
+                    name="modality"
+                    value={form.modality}
+                    onChange={handleChange}
+                    className={`w-full p-2 pl-10 border rounded dark:bg-gray-700 dark:border-gray-600 ${
+                      errors.modality ? "border-red-500" : ""
+                    }`}
+                  >
+                    <option value="">Selecione a Modalidade</option>
+                    <option value="Futebol">Futebol</option>
+                    <option value="Basquetebol">Basquetebol</option>
+                    <option value="Tenis">Ténis</option>
+                    <option value="Futsal">Futsal</option>
+                    <option value="Outros">Outros Eventos</option>
+                  </select>
+                </div>
                 {errors.modality && (
-                  <p className="text-red-500 text-sm mt-1">{errors.modality}</p>
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.modality}
+                  </p>
                 )}
               </div>
 
@@ -439,10 +523,10 @@ const AddSpacePage = () => {
             </div>
           </div>
 
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex gap-4 justify-center mt-8">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               disabled={uploading}
             >
               {uploading ? "Salvando..." : "Adicionar"}
@@ -450,13 +534,21 @@ const AddSpacePage = () => {
             <button
               type="button"
               onClick={() => navigate("/spaces")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Instalação"
+        message="Tem certeza de que deseja adicionar esta instalação desportiva?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };

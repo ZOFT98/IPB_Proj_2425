@@ -1,8 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "../firebase/authService";
+import { createUser } from "../firebase/authService";
 import { notify } from "../services/notificationService";
 import defaultProfileImage from "../uploads/default-profile.jpg";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaUser,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaLock,
+  FaCalendarDay,
+  FaVenusMars,
+  FaUserTag,
+} from "react-icons/fa";
 
 const AddUserPage = () => {
   const [form, setForm] = useState({
@@ -21,6 +32,7 @@ const AddUserPage = () => {
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = () => {
@@ -68,13 +80,11 @@ const AddUserPage = () => {
     setPreview(URL.createObjectURL(file));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setIsSubmitting(true);
-
     try {
-      await register(form);
+      await createUser(form);
       notify("Utilizador adicionado com sucesso!", "success");
       navigate("/users");
     } catch (error) {
@@ -84,33 +94,36 @@ const AddUserPage = () => {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
+
   const fields = [
-    { name: "name", label: "Nome", type: "text" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "address", label: "Morada", type: "text" },
-    { name: "contact", label: "Contacto", type: "text" },
+    { name: "name", label: "Nome", type: "text", icon: <FaUser /> },
+    { name: "email", label: "Email", type: "email", icon: <FaEnvelope /> },
+    { name: "address", label: "Morada", type: "text", icon: <FaMapMarkerAlt /> },
+    { name: "contact", label: "Contacto", type: "text", icon: <FaPhone /> },
   ];
 
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-        >
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Adicionar Utilizador
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-4xl py-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <h1 className="text-3xl font-bold mb-8 text-center">
+            Adicionar Novo Utilizador
           </h1>
 
-          <div className="mb-4 flex flex-col items-center">
+          <div className="mb-6 flex flex-col items-center">
             {preview ? (
               <img
                 src={preview}
                 alt="Preview"
-                className="w-32 h-32 rounded-full object-cover mb-2"
+                className="w-32 h-32 rounded-full object-cover mb-4"
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center">
                 <img
                   src={defaultProfileImage}
                   alt="Default"
@@ -123,170 +136,220 @@ const AddUserPage = () => {
               accept="image/*"
               onChange={handleImageChange}
               disabled={isSubmitting}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              className="block w-full max-w-xs text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-blue-300 dark:hover:file:bg-gray-600"
             />
           </div>
 
-          {fields.map((field) => (
-            <div className="mb-3" key={field.name}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {fields.map((field) => (
+              <div key={field.name}>
+                <label
+                  htmlFor={field.name}
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  {field.label} *
+                </label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                    {field.icon}
+                  </span>
+                  <input
+                    id={field.name}
+                    type={field.type}
+                    name={field.name}
+                    value={form[field.name]}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    placeholder={field.label}
+                    className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                      errors[field.name] ? "border-red-500" : ""
+                    }`}
+                  />
+                </div>
+                {errors[field.name] && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors[field.name]}
+                  </p>
+                )}
+              </div>
+            ))}
+
+            <div>
               <label
-                htmlFor={field.name}
+                htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                {field.label} *
+                Password *
               </label>
-              <input
-                id={field.name}
-                type={field.type}
-                name={field.name}
-                value={form[field.name]}
-                onChange={handleChange}
-                disabled={isSubmitting}
-                placeholder={field.label}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors[field.name] ? "border-red-500" : ""}`}
-              />
-              {errors[field.name] && (
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaLock />
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  placeholder="*********"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.password ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Confirmar Password *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaLock />
+                </span>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  placeholder="*********"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.confirmPassword ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.confirmPassword && (
                 <p className="text-red-500 text-sm mt-1">
-                  {errors[field.name]}
+                  {errors.confirmPassword}
                 </p>
               )}
             </div>
-          ))}
 
-          <div className="mb-4">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Palavra-passe *
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                errors.password ? "border-red-500" : ""
-              }`}
-            />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-            )}
+            <div>
+              <label
+                htmlFor="birthdate"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Data de Nascimento *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCalendarDay />
+                </span>
+                <input
+                  id="birthdate"
+                  name="birthdate"
+                  type="date"
+                  value={form.birthdate}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.birthdate ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.birthdate && (
+                <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Gênero *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaVenusMars />
+                </span>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.gender ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Selecione o Gênero</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Role *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaUserTag />
+                </span>
+                <select
+                  id="role"
+                  name="role"
+                  value={form.role}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.role ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="admin">Administrador</option>
+                  <option value="superadmin">Super Administrador</option>
+                </select>
+              </div>
+              {errors.role && (
+                <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+              )}
+            </div>
           </div>
 
-          <div className="mb-4">
-            <label
-              htmlFor="confirmPassword"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Confirmar Palavra-passe *
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                errors.confirmPassword ? "border-red-500" : ""
-              }`}
-            />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
-
-          <div className="mb-3">
-            <label
-              htmlFor="birthdate"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Data de Nascimento *
-            </label>
-            <input
-              id="birthdate"
-              name="birthdate"
-              type="date"
-              value={form.birthdate}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.birthdate ? "border-red-500" : ""}`}
-            />
-            {errors.birthdate && (
-              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Gênero *
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.gender ? "border-red-500" : ""}`}
-            >
-              <option value="">Selecione o Gênero</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-            </select>
-            {errors.gender && (
-              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Role *
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              disabled={isSubmitting}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.role ? "border-red-500" : ""}`}
-            >
-              <option value="admin">Administrador</option>
-              <option value="superadmin">Super Administrador</option>
-            </select>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
-            )}
-          </div>
-
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex gap-4 justify-center mt-8">
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Salvando..." : "Adicionar"}
+              {isSubmitting ? "Salvando..." : "Adicionar Utilizador"}
             </button>
             <button
               type="button"
               onClick={() => navigate("/users")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Adição"
+        message="Tem certeza de que deseja adicionar este utilizador?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };

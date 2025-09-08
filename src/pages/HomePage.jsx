@@ -106,9 +106,9 @@ const HomePage = () => {
             isSelected
               ? "bg-blue-500 text-white rounded-full font-bold"
               : isToday
-                ? "bg-blue-100 dark:bg-blue-900 rounded-full font-bold"
+                ? "bg-green-100 dark:bg-blue-900 rounded-full font-bold"
                 : hasEvent
-                  ? "bg-green-100 dark:bg-green-900/40 rounded-full"
+                  ? "bg-blue-100 dark:bg-green-900/40 rounded-full"
                   : ""
           }`;
 
@@ -327,16 +327,16 @@ const HomePage = () => {
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md mb-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <button
-              onClick={() => navigate("/add-bookings")}
-              className="flex items-center justify-center p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              <FaCalendarPlus className="mr-2" /> Adicionar Reserva
-            </button>
-            <button
               onClick={() => navigate("/spaces/add")}
               className="flex items-center justify-center p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               <FaBuilding className="mr-2" /> Adicionar Instalação
+            </button>
+            <button
+              onClick={() => navigate("/add-bookings")}
+              className="flex items-center justify-center p-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <FaCalendarPlus className="mr-2" /> Adicionar Reserva
             </button>
             <button
               onClick={() => navigate("/add-user")}
@@ -396,7 +396,9 @@ const HomePage = () => {
           </table>
 
           <div className="mt-8">
-            <h3 className="font-bold mb-3 text-lg">Eventos Diários</h3>
+            <h3 className="font-bold mb-3 text-lg">
+              Eventos Diários - {bookings.length + tickets.length}
+            </h3>
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg">
               <p className="text-base">
                 {selectedDate.toLocaleDateString("pt-PT", {

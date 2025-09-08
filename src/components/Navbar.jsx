@@ -42,7 +42,7 @@ const Navbar = () => {
   return (
     <aside className="w-64 bg-white dark:bg-gray-800 shadow-md p-4 flex flex-col">
       <Link to="/home">
-        <div className="flex items-center mb-8">
+        <div className="flex justify-center items-center mb-8">
           <FaFutbol className="text-2xl mr-5 text-gray-800 dark:text-gray-100" />
           <h2 className="text-xl font-bold text-gray-800 text-center dark:text-gray-100">
             GestSports
@@ -107,19 +107,25 @@ const Navbar = () => {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <Link to="/profile">
+        <Link
+          to="/profile"
+          className="flex items-center gap-2 min-w-0"
+          title={currentUser?.name}
+        >
           <img
             src={currentUser?.photoURL || "/src/uploads/default-profile.jpg"}
             alt="Foto de Perfil"
             className="w-8 h-8 rounded-full"
           />
+          <span className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+            {currentUser?.name}
+          </span>
         </Link>
         <button
           onClick={handleLogout}
           className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400"
         >
           <FaSignOutAlt className="mr-2" />
-          Logout
         </button>
       </div>
     </aside>

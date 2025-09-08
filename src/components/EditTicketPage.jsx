@@ -11,6 +11,15 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { notify } from "../services/notificationService";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaTicketAlt,
+  FaUser,
+  FaBuilding,
+  FaCalendarDay,
+  FaAlignLeft,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const EditTicketPage = () => {
   const { id } = useParams();
@@ -27,6 +36,7 @@ const EditTicketPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [spaces, setSpaces] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchSpaces = async () => {
@@ -91,10 +101,14 @@ const EditTicketPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
 
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setIsSubmitting(true);
     try {
       const ticketRef = doc(db, "tickets", id);
@@ -122,117 +136,185 @@ const EditTicketPage = () => {
   }
 
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6 text-center">Editar Ticket</h1>
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-4xl py-8">
+        <h1 className="text-3xl font-bold mb-8 text-center">Editar Ticket</h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-        >
-          {/* Title Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Título *</label>
-            <input
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-            )}
-          </div>
-
-          {/* Name Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Nome *</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? "border-red-500" : ""}`}
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-            )}
-          </div>
-
-          {/* Space Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Espaço Desportivo *
-            </label>
-            <select
-              name="space"
-              value={form.space}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
-            >
-              <option value="">Selecione um espaço</option>
-              {spaces.map((space) => (
-                <option key={space.id} value={space.name}>
-                  {space.name}
-                </option>
-              ))}
-            </select>
-            {errors.space && (
-              <p className="text-red-500 text-sm mt-1">{errors.space}</p>
-            )}
-          </div>
-
-          {/* Date and Status Fields */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-1">Data *</label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.date ? "border-red-500" : ""}`}
-              />
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Título *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaTicketAlt />
+                </span>
+                <input
+                  id="title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.title ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Nome *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaUser />
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="space"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Espaço Desportivo *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaBuilding />
+                </span>
+                <select
+                  id="space"
+                  name="space"
+                  value={form.space}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.space ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Selecione um espaço</option>
+                  {spaces.map((space) => (
+                    <option key={space.id} value={space.name}>
+                      {space.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {errors.space && (
+                <p className="text-red-500 text-sm mt-1">{errors.space}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Data *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCalendarDay />
+                </span>
+                <input
+                  id="date"
+                  type="date"
+                  name="date"
+                  value={form.date}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.date ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
               {errors.date && (
                 <p className="text-red-500 text-sm mt-1">{errors.date}</p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
+
+            <div className="col-span-1 md:col-span-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                <option value="pending">Pendente</option>
-                <option value="in_progress">Em Progresso</option>
-                <option value="completed">Concluído</option>
-                <option value="cancelled">Cancelado</option>
-              </select>
+                Descrição
+              </label>
+              <div className="relative">
+                <span className="absolute top-3 left-0 flex items-center pl-3 text-gray-400">
+                  <FaAlignLeft />
+                </span>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  rows={3}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.description ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Status
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCheckCircle />
+                </span>
+                <select
+                  id="status"
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="pending">Pendente</option>
+                  <option value="in_progress">Em Progresso</option>
+                  <option value="completed">Concluído</option>
+                  <option value="cancelled">Cancelado</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Description Field */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Descrição</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              rows={3}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? "border-red-500" : ""}`}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-            )}
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex gap-2 justify-center mt-6">
+          <div className="flex gap-4 justify-center pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors flex items-center justify-center w-48"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center w-48 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -265,13 +347,21 @@ const EditTicketPage = () => {
             <button
               type="button"
               onClick={() => navigate("/tickets")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Ticket"
+        message="Tem certeza de que deseja atualizar este ticket?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };

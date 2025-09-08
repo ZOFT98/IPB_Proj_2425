@@ -9,6 +9,16 @@ import { FaKey } from "react-icons/fa";
 import { auth } from "../firebase";
 import { notify } from "../services/notificationService";
 import { AuthContext } from "../contexts/AuthContext";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaUser,
+  FaEnvelope,
+  FaMapMarkerAlt,
+  FaPhone,
+  FaCalendarDay,
+  FaVenusMars,
+  FaUserTag,
+} from "react-icons/fa";
 
 const EditUserPage = () => {
   const { currentUser, refreshCurrentUser } = useContext(AuthContext);
@@ -28,6 +38,7 @@ const EditUserPage = () => {
   const [preview, setPreview] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -113,10 +124,14 @@ const EditUserPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
 
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setIsSubmitting(true);
     try {
       let photoURL = form.photoURL;
@@ -169,26 +184,22 @@ const EditUserPage = () => {
   };
 
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-        >
-          <h1 className="text-2xl font-bold mb-6 text-center">
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-4xl py-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <h1 className="text-3xl font-bold mb-8 text-center">
             Editar Utilizador
           </h1>
 
-          {/* Avatar */}
-          <div className="mb-4 flex flex-col items-center">
+          <div className="mb-6 flex flex-col items-center">
             {preview ? (
               <img
                 src={preview}
                 alt="Preview"
-                className="w-32 h-32 rounded-full object-cover mb-2"
+                className="w-32 h-32 rounded-full object-cover mb-4"
               />
             ) : (
-              <div className="w-32 h-32 rounded-full bg-gray-200 mb-2 flex items-center justify-center">
+              <div className="w-32 h-32 rounded-full bg-gray-200 dark:bg-gray-700 mb-4 flex items-center justify-center">
                 <span className="text-gray-500">Sem imagem</span>
               </div>
             )}
@@ -196,146 +207,233 @@ const EditUserPage = () => {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100"
+              className="block w-full max-w-xs text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-blue-300 dark:hover:file:bg-gray-600"
             />
           </div>
 
-          {/* Inputs */}
-          {[
-            { name: "name", type: "text", label: "Nome" },
-            { name: "email", type: "email", label: "Email" },
-            { name: "address", type: "text", label: "Morada" },
-            { name: "contact", type: "text", label: "Contacto" },
-          ].map(({ name, type, label }) => (
-            <div className="mb-3" key={name}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
               <label
-                htmlFor={name}
+                htmlFor="name"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-                {label} *
+                Nome *
               </label>
-              <input
-                id={name}
-                name={name}
-                type={type}
-                value={form[name]}
-                onChange={handleChange}
-                placeholder={label}
-                className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                  errors[name] ? "border-red-500" : ""
-                }`}
-              />
-              {errors[name] && (
-                <p className="text-red-500 text-sm mt-1">{errors[name]}</p>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaUser />
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Nome"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
               )}
             </div>
-          ))}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Email *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaEnvelope />
+                </span>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="Email"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.email ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Morada *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaMapMarkerAlt />
+                </span>
+                <input
+                  id="address"
+                  name="address"
+                  type="text"
+                  value={form.address}
+                  onChange={handleChange}
+                  placeholder="Morada"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.address ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.address && (
+                <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="contact"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Contacto *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaPhone />
+                </span>
+                <input
+                  id="contact"
+                  name="contact"
+                  type="text"
+                  value={form.contact}
+                  onChange={handleChange}
+                  placeholder="Contacto"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.contact ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.contact && (
+                <p className="text-red-500 text-sm mt-1">{errors.contact}</p>
+              )}
+            </div>
 
-          {/* Birthdate */}
-          <div className="mb-3">
-            <label
-              htmlFor="birthdate"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Data de Nascimento *
-            </label>
-            <input
-              id="birthdate"
-              name="birthdate"
-              type="date"
-              value={form.birthdate}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                errors.birthdate ? "border-red-500" : ""
-              }`}
-            />
-            {errors.birthdate && (
-              <p className="text-red-500 text-sm mt-1">{errors.birthdate}</p>
-            )}
+            <div>
+              <label
+                htmlFor="birthdate"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Data de Nascimento *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCalendarDay />
+                </span>
+                <input
+                  id="birthdate"
+                  name="birthdate"
+                  type="date"
+                  value={form.birthdate}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.birthdate ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.birthdate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.birthdate}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="gender"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Gênero *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaVenusMars />
+                </span>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={form.gender}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.gender ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Selecione o Gênero</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                </select>
+              </div>
+              {errors.gender && (
+                <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Role *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaUserTag />
+                </span>
+                <select
+                  id="role"
+                  name="role"
+                  value={form.role}
+                  onChange={handleChange}
+                  disabled={currentUser?.role !== "superadmin"}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.role ? "border-red-500" : ""
+                  } ${
+                    currentUser?.role !== "superadmin"
+                      ? "cursor-not-allowed bg-gray-200 dark:bg-gray-600"
+                      : ""
+                  }`}
+                >
+                  <option value="admin">Administrador</option>
+                  <option value="superadmin">Super Administrador</option>
+                </select>
+              </div>
+              {errors.role && (
+                <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+              )}
+            </div>
           </div>
 
-          {/* Gender */}
-          <div className="mb-4">
-            <label
-              htmlFor="gender"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Gênero *
-            </label>
-            <select
-              id="gender"
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                errors.gender ? "border-red-500" : ""
-              }`}
-            >
-              <option value="">Selecione o Gênero</option>
-              <option value="Masculino">Masculino</option>
-              <option value="Feminino">Feminino</option>
-            </select>
-            {errors.gender && (
-              <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-            )}
-          </div>
-
-          {/* Role */}
-          <div className="mb-4">
-            <label
-              htmlFor="role"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Role *
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              disabled={currentUser?.role !== "superadmin"}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${
-                errors.role ? "border-red-500" : ""
-              } ${
-                currentUser?.role !== "superadmin"
-                  ? "cursor-not-allowed bg-gray-200 dark:bg-gray-600"
-                  : ""
-              }`}
-            >
-              <option value="admin">Administrador</option>
-              <option value="superadmin">Super Administrador</option>
-            </select>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
-            )}
-          </div>
-
-          {/* Password Reset Section */}
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Gestão de Palavra-passe
             </label>
             <button
               type="button"
               onClick={handlePasswordReset}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
             >
               <FaKey />
               Enviar Email de Redefinição
             </button>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex gap-4 justify-center mt-8">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center justify-center w-40"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center w-48 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -362,19 +460,27 @@ const EditUserPage = () => {
                   Atualizando...
                 </>
               ) : (
-                "Atualizar"
+                "Atualizar Utilizador"
               )}
             </button>
             <button
               type="button"
               onClick={() => navigate("/users")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Utilizador"
+        message="Tem certeza de que deseja atualizar este utilizador?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };

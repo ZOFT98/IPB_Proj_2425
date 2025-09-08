@@ -9,6 +9,15 @@ import {
   query,
 } from "firebase/firestore";
 import { notify } from "../services/notificationService";
+import ConfirmationModal from "./ConfirmationModal";
+import {
+  FaTicketAlt,
+  FaUser,
+  FaBuilding,
+  FaCalendarDay,
+  FaAlignLeft,
+  FaCheckCircle,
+} from "react-icons/fa";
 
 const AddTicketPage = () => {
   const navigate = useNavigate();
@@ -22,6 +31,7 @@ const AddTicketPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [spaces, setSpaces] = useState([]);
 
   useEffect(() => {
@@ -63,10 +73,8 @@ const AddTicketPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-
+  const handleConfirmSubmit = async () => {
+    setIsModalOpen(false);
     setIsSubmitting(true);
 
     try {
@@ -88,172 +96,219 @@ const AddTicketPage = () => {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setIsModalOpen(true);
+  };
+
   return (
-    <div className="dark:text-gray-100">
-      <div className="mx-auto max-w-md px-4 py-8">
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
-        >
-          <h1 className="text-2xl font-bold mb-6 text-center">
-            Adicionar Ticket
+    <div className="dark:text-gray-100 p-4">
+      <div className="mx-auto max-w-4xl py-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <h1 className="text-3xl font-bold mb-8 text-center">
+            Adicionar Novo Ticket
           </h1>
 
-          {/* Title */}
-          <div className="mb-3">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Título *
-            </label>
-            <input
-              id="title"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="Título"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.title ? "border-red-500" : ""}`}
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Título *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaTicketAlt />
+                </span>
+                <input
+                  id="title"
+                  name="title"
+                  value={form.title}
+                  onChange={handleChange}
+                  placeholder="Título"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.title ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.title && (
+                <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Nome *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaUser />
+                </span>
+                <input
+                  id="name"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  placeholder="Nome"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.name ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.name && (
+                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="space"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Espaço Desportivo *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaBuilding />
+                </span>
+                <select
+                  id="space"
+                  name="space"
+                  value={form.space}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.space ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="">Selecione um espaço</option>
+                  {spaces.map((space) => (
+                    <option key={space.id} value={space.name}>
+                      {space.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {errors.space && (
+                <p className="text-red-500 text-sm mt-1">{errors.space}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="date"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Data *
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCalendarDay />
+                </span>
+                <input
+                  id="date"
+                  name="date"
+                  type="date"
+                  value={form.date}
+                  onChange={handleChange}
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.date ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.date && (
+                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+              )}
+            </div>
+            <div className="col-span-1 md:col-span-2">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Descrição *
+              </label>
+              <div className="relative">
+                <span className="absolute top-3 left-0 flex items-center pl-3 text-gray-400">
+                  <FaAlignLeft />
+                </span>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={form.description}
+                  onChange={handleChange}
+                  placeholder="Descrição"
+                  rows="3"
+                  className={`w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500 ${
+                    errors.description ? "border-red-500" : ""
+                  }`}
+                />
+              </div>
+              {errors.description && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.description}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Status
+              </label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <FaCheckCircle />
+                </span>
+                <select
+                  id="status"
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full p-3 pl-10 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="pending">Pendente</option>
+                  <option value="in_progress">Em Progresso</option>
+                  <option value="completed">Concluído</option>
+                  <option value="cancelled">Cancelado</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          {/* Name */}
-          <div className="mb-3">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Nome *
-            </label>
-            <input
-              id="name"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Nome"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.name ? "border-red-500" : ""}`}
-            />
-            {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-            )}
-          </div>
-
-          {/* Space */}
-          <div className="mb-3">
-            <label
-              htmlFor="space"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Espaço Desportivo *
-            </label>
-            <select
-              id="space"
-              name="space"
-              value={form.space}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.space ? "border-red-500" : ""}`}
-            >
-              <option value="">Selecione um espaço</option>
-              {spaces.map((space) => (
-                <option key={space.id} value={space.name}>
-                  {space.name}
-                </option>
-              ))}
-            </select>
-            {errors.space && (
-              <p className="text-red-500 text-sm mt-1">{errors.space}</p>
-            )}
-          </div>
-
-          {/* Date */}
-          <div className="mb-3">
-            <label
-              htmlFor="date"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Data *
-            </label>
-            <input
-              id="date"
-              name="date"
-              type="date"
-              value={form.date}
-              onChange={handleChange}
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.date ? "border-red-500" : ""}`}
-            />
-            {errors.date && (
-              <p className="text-red-500 text-sm mt-1">{errors.date}</p>
-            )}
-          </div>
-
-          {/* Description */}
-          <div className="mb-3">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Descrição *
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="Descrição"
-              rows="3"
-              className={`w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 ${errors.description ? "border-red-500" : ""}`}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-            )}
-          </div>
-
-          {/* Status */}
-          <div className="mb-4">
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-            >
-              Status
-            </label>
-            <select
-              id="status"
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600"
-            >
-              <option value="pending">Pendente</option>
-              <option value="in_progress">Em Progresso</option>
-              <option value="completed">Concluído</option>
-              <option value="cancelled">Cancelado</option>
-            </select>
-          </div>
-
-          {/* Submit */}
-          <div className="flex gap-2 justify-center mt-4">
+          <div className="flex gap-4 justify-center pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ${
+              className={`bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors ${
                 isSubmitting ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {isSubmitting ? "Enviando..." : "Adicionar"}
+              {isSubmitting ? "Enviando..." : "Adicionar Ticket"}
             </button>
             <button
               type="button"
               onClick={() => navigate("/tickets")}
-              className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
             >
               Cancelar
             </button>
           </div>
         </form>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleConfirmSubmit}
+        title="Confirmar Ticket"
+        message="Tem certeza de que deseja adicionar este ticket?"
+        confirmButtonClass="bg-blue-600 hover:bg-blue-700"
+      />
     </div>
   );
 };
